@@ -1,0 +1,189 @@
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+<resources>
+    <string name="app_name">Curmudgeon Rotation</string>
+
+    <!-- orientation modes -->
+    <string name="mode_auto">Auto</string>
+    <string name="mode_portrait">Portrait</string>
+    <string name="mode_landscape">Landscape</string>
+    <string name="mode_reverse_landscape">Reverse landscape</string>
+    <string name="mechanism_system">System setting</string>
+    <string name="mechanism_overlay">Overlay</string>
+    <string name="detection_accessibility">Accessibility service (recommended)</string>
+    <string name="detection_usage_stats">Usage access polling</string>
+    <string name="overlay_type_accessibility">Accessibility overlay (no extra permission)</string>
+    <string name="overlay_type_application">App overlay (Display over other apps)</string>
+    <string name="tile_cycle_apl">Auto → Portrait → Landscape</string>
+    <string name="tile_cycle_aplr">Auto → Portrait → Landscape → Reverse landscape</string>
+
+    <!-- tile -->
+    <string name="tile_label">Rotation</string>
+    <string name="tile_needs_setup">Tap to set up</string>
+
+    <!-- accessibility service -->
+    <string name="accessibility_service_label">Curmudgeon Rotation: per-app rules</string>
+    <string name="accessibility_service_description">Lets Curmudgeon Rotation apply your per-app rotation rules. It only reads which app and screen is in front (package and screen class name). It cannot read window content, text, passwords or input. Nothing is stored off your device or transmitted: the app has no internet permission.</string>
+
+    <!-- rule actions -->
+    <string name="action_follow_system">Follow system</string>
+    <string name="action_follow_system_desc">Rule paused. Rotation stays as the system has it.</string>
+    <string name="action_auto_on">Auto-rotate on</string>
+    <string name="action_auto_on_desc">Turns on system auto-rotate. For apps that rotate only when auto-rotate is on (YouTube).</string>
+    <string name="action_auto_off">Auto-rotate off</string>
+    <string name="action_auto_off_desc">Turns off auto-rotate, keeping the current rotation.</string>
+    <string name="action_portrait">Portrait</string>
+    <string name="action_portrait_desc">Locks the system rotation to portrait.</string>
+    <string name="action_landscape">Landscape</string>
+    <string name="action_landscape_desc">Locks the system rotation to landscape.</string>
+    <string name="action_reverse_landscape">Reverse landscape</string>
+    <string name="action_reverse_landscape_desc">Locks the system rotation to upside-down landscape.</string>
+    <string name="action_force_landscape">Force landscape (overlay)</string>
+    <string name="action_force_landscape_desc">Overrides apps that lock themselves to portrait (HBO Max class). Follows the sensor between both landscape sides.</string>
+    <string name="action_force_portrait">Force portrait (overlay)</string>
+    <string name="action_force_portrait_desc">Overrides apps that lock themselves to landscape.</string>
+    <string name="action_force_auto">Force auto (overlay)</string>
+    <string name="action_force_auto_desc">Rotates to all four sides with the sensor, even if the app or the rotation lock says otherwise.</string>
+
+    <!-- main screen -->
+    <string name="main_status">Status</string>
+    <string name="main_rules">Rules</string>
+    <string name="main_add_rule">Add rule</string>
+    <string name="main_rules_empty">No rules yet. The Quick Settings tile works without rules; add one to rotate automatically for a specific app.</string>
+    <string name="main_current_mode">Current rotation: %1$s (%2$s)</string>
+    <string name="status_fix">Fix</string>
+    <string name="status_add">Add</string>
+    <string name="status_tile">Quick Settings tile</string>
+    <string name="status_tile_ok">Added. Tap it to cycle rotation, long-press to open this app.</string>
+    <string name="status_tile_missing">Not added yet</string>
+    <string name="status_write_settings">Modify system settings</string>
+    <string name="status_write_settings_ok">Allowed. The tile and rotation rules can change rotation.</string>
+    <string name="status_write_settings_missing">Needed by the tile and by all non-overlay rules</string>
+    <string name="status_overlay">Display over other apps (optional)</string>
+    <string name="status_overlay_ok">Allowed</string>
+    <string name="status_overlay_missing">Only needed for force rules if you use app overlays or keep the accessibility service off</string>
+    <string name="status_detection_accessibility">App detection: accessibility service</string>
+    <string name="status_accessibility_ok">Active. Per-app rules run.</string>
+    <string name="status_accessibility_starting">Switched on, waiting for the system to start it. If it stays like this, switch it off and on again.</string>
+    <string name="status_accessibility_missing">Off. Per-app rules don\'t run.</string>
+    <string name="status_detection_usage">App detection: usage access</string>
+    <string name="status_usage_ok">Active. Per-app rules run while the screen is on.</string>
+    <string name="status_usage_not_running">Allowed, but the detection service isn\'t running</string>
+    <string name="status_usage_missing">Usage access not allowed. Per-app rules don\'t run.</string>
+
+    <!-- setup / permission explanations -->
+    <string name="setup_open_settings">Open settings</string>
+    <string name="setup_not_now">Not now</string>
+    <string name="setup_done">Done</string>
+    <string name="setup_status_done">✓ Allowed. You\'re all set.</string>
+    <string name="setup_status_missing">Not allowed yet.</string>
+    <string name="setup_open_app_info">Toggle greyed out? Open app info</string>
+    <string name="setup_write_settings_title">Allow changing rotation</string>
+    <string name="setup_write_settings_body">Rotation lock and the locked rotation are system settings. To change them from the Quick Settings tile or a per-app rule, Android requires the \"Modify system settings\" permission.\n\nCurmudgeon Rotation only writes two settings: auto-rotate on/off and the locked rotation. It remembers your previous values and puts them back when a rule ends.\n\nOn the next screen, switch on \"Allow modifying system settings\", then come back.</string>
+    <string name="setup_overlay_title">Allow the orientation overlay</string>
+    <string name="setup_overlay_body">Some apps lock their own orientation (for example HBO Max stays portrait even with auto-rotate on). Changing system settings can\'t override that.\n\nThe \"force\" options add an invisible, zero-size window that asks Android for an orientation. It draws nothing and can\'t be touched.\n\nThat window can come from the accessibility service (no extra permission) or from \"Display over other apps\". Allow it on the next screen if you want to use app overlays or force rotation from the tile without the accessibility service.\n\nNote: on Android 12 and newer, apps can hide app overlays while they are open, so forcing may not work in every app. The accessibility overlay is not affected by that.</string>
+    <string name="setup_accessibility_title">Per-app rules: accessibility service</string>
+    <string name="setup_accessibility_body">To switch rotation when you open a specific app, Curmudgeon Rotation needs to know which app is in front. Android provides this through an accessibility service.\n\nWhat it reads: only which app and screen is in front (the package name and the screen\'s class name, for example com.google.android.youtube).\n\nWhat it does not read: window content, text you type or see, passwords, notifications or gestures.\n\nWhat happens to it: it is used on your device to pick a rule. A short list of recently seen screens is kept in the app\'s private storage so you can limit rules to specific screens; you can view and clear it in settings. Nothing is transmitted. The app has no internet permission.\n\nThe same service can also hold the invisible overlay window used by the \"force\" rules.\n\nOn the next screen, find \"Curmudgeon Rotation: per-app rules\" under installed or downloaded apps and switch it on.\n\nIf the switch is greyed out (\"Restricted setting\"), Android is blocking it because the app was not installed from a store: open app info, tap the ⋮ menu, choose \"Allow restricted settings\", then try again.</string>
+    <string name="setup_accessibility_agree">I agree, open accessibility settings</string>
+    <string name="setup_usage_title">Per-app rules: usage access</string>
+    <string name="setup_usage_body">An alternative to the accessibility service. With usage access, Curmudgeon Rotation checks which app was opened most recently, once per poll interval (default 1 second), only while the screen is on.\n\nIt reacts a little slower than the accessibility service and needs a small ongoing notification so Android keeps it running.\n\nThe usage data is read on your device only to pick a rule. Nothing is transmitted. The app has no internet permission.\n\nOn the next screen, choose Curmudgeon Rotation and switch on \"Permit usage access\".</string>
+    <string name="setup_tile_title">Add the Quick Settings tile</string>
+    <string name="setup_tile_body">The Rotation tile switches between Auto, Portrait and Landscape with one tap. Long-press it to open this app.\n\nTo add it: swipe down twice from the top of the screen, tap the pencil (edit) icon, and drag \"Rotation\" into your active tiles.</string>
+    <string name="setup_tile_add">Add tile</string>
+
+    <!-- app picker -->
+    <string name="picker_title">Choose app</string>
+    <string name="picker_search">Search apps</string>
+    <string name="picker_show_system">Show system apps</string>
+
+    <!-- rule editor -->
+    <string name="editor_title">Rule</string>
+    <string name="editor_action">While this app is in front</string>
+    <string name="editor_screens">Screens</string>
+    <string name="editor_only_screens">Only on specific screens</string>
+    <string name="editor_only_screens_help">Limit the rule to certain screens of the app, for example only its video player. Other screens follow the system.</string>
+    <string name="editor_selected_screens">Rule applies to</string>
+    <string name="editor_selected_empty">No screens selected</string>
+    <string name="editor_recent_screens">Recently seen screens</string>
+    <string name="editor_recent_empty">None seen yet. With app detection active, open the app and go to the screen you want, then come back here.</string>
+    <string name="editor_add">Add</string>
+    <string name="editor_remove">Remove</string>
+    <string name="editor_add_screen">Add screen by class name</string>
+    <string name="editor_add_screen_message">Full activity class name. A name starting with \".\" is relative to the app\'s package.</string>
+    <string name="editor_add_screen_hint">com.example.app.PlayerActivity</string>
+    <string name="editor_save">Save rule</string>
+    <string name="editor_delete">Delete rule</string>
+    <string name="editor_no_screens">Add at least one screen, or switch off \"Only on specific screens\".</string>
+    <string name="editor_needs_write_settings">This action needs the \"Modify system settings\" permission.</string>
+    <string name="editor_needs_overlay">Force actions need the accessibility service or \"Display over other apps\".</string>
+    <string name="editor_overlay_note">Force actions use an invisible overlay window. Some apps hide overlays on Android 12+, so this may not work everywhere; the accessibility overlay is the most reliable.</string>
+    <string name="rule_all_screens">all screens</string>
+    <string name="rule_not_installed">not installed</string>
+    <plurals name="rule_screen_count">
+        <item quantity="one">%d screen</item>
+        <item quantity="other">%d screens</item>
+    </plurals>
+
+    <!-- notification -->
+    <string name="notification_channel">Rotation service</string>
+    <string name="notification_mode">Rotation: %1$s</string>
+    <string name="notification_reason_usage">watching for app changes</string>
+    <string name="notification_reason_overlay">holding overlay orientation</string>
+
+    <!-- settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_advanced">Advanced</string>
+    <string name="pref_category_detection">App detection</string>
+    <string name="pref_detection_method">Detection method</string>
+    <string name="pref_ignore_launcher">Ignore launcher</string>
+    <string name="pref_ignore_launcher_summary">Going home or through recents doesn\'t end the current app\'s rule</string>
+    <string name="pref_ignored_packages">Ignored apps</string>
+    <string name="pref_ignored_packages_message">Package names, one per line. These apps never change the active rule (useful for floating windows). Keyboards and system UI are always ignored.</string>
+    <string name="pref_ignored_packages_none">None besides keyboards and system UI</string>
+    <plurals name="pref_ignored_packages_count">
+        <item quantity="one">%d app, plus keyboards and system UI</item>
+        <item quantity="other">%d apps, plus keyboards and system UI</item>
+    </plurals>
+    <string name="pref_debounce">Debounce</string>
+    <string name="pref_debounce_message">Wait this many milliseconds after an app change before applying a rule, so brief screens don\'t cause flicker. 0–5000.</string>
+    <string name="pref_debounce_summary">%1$s ms</string>
+    <string name="pref_poll_interval">Usage access poll interval</string>
+    <string name="pref_poll_interval_message">How often to check the foreground app in usage access mode, in milliseconds. Lower reacts faster but uses more battery. 250–60000.</string>
+    <string name="pref_poll_interval_summary">Every %1$s ms, only while the screen is on</string>
+    <string name="pref_number_out_of_range">Enter a number from %1$d to %2$d</string>
+    <string name="pref_start_on_boot">Start on boot</string>
+    <string name="pref_start_on_boot_summary">Start usage access detection and the quick-actions notification after the phone restarts</string>
+    <string name="pref_category_rotation">Rotation</string>
+    <string name="pref_restore">Restore rotation when leaving an app</string>
+    <string name="pref_restore_summary">Put back your previous auto-rotate and rotation when a rule stops applying. Skipped if you changed rotation yourself in the meantime.</string>
+    <string name="pref_tile_mechanism">Tile and notification mechanism</string>
+    <string name="pref_overlay_type">Overlay type</string>
+    <string name="pref_category_tile">Tile and notification</string>
+    <string name="pref_tile_cycle">Tile cycle order</string>
+    <string name="pref_quick_actions">Quick-actions notification</string>
+    <string name="pref_quick_actions_summary">Ongoing notification with Portrait, Landscape and Auto buttons</string>
+    <string name="pref_category_rules">Rules</string>
+    <string name="pref_export">Export rules</string>
+    <string name="pref_export_summary">Save all rules to a file you choose</string>
+    <string name="pref_import">Import rules</string>
+    <string name="pref_import_summary">Add rules from a file; rules for the same app are replaced</string>
+    <string name="pref_recent_log">Recently seen screens</string>
+    <string name="pref_recent_log_summary">View or clear the on-device log of screens detected</string>
+    <string name="recent_log_empty">Nothing logged yet.</string>
+    <string name="recent_log_clear">Clear</string>
+    <string name="pref_category_about">About</string>
+    <string name="pref_about">About Curmudgeon Rotation</string>
+    <string name="pref_about_summary">Version %1$s · GPL-3.0 · privacy</string>
+    <string name="about_text">Version %1$s\n\nPer-app screen rotation control and a Quick Settings tile. No ads, no tracking.\n\nLicense: GNU General Public License v3.0 only (GPL-3.0-only). This is free software: you can redistribute and modify it under that license. It comes with no warranty. The complete source code is available under the same license.\n\nPrivacy: the app has no internet permission, so nothing can leave your device. The accessibility service only reads which app and screen is in front. Rules, settings and the recently-seen-screens log stay in the app\'s private storage, and are excluded from cloud backup. Exported rule files go only where you save them.</string>
+
+    <!-- import / export -->
+    <plurals name="rules_exported">
+        <item quantity="one">Exported %d rule</item>
+        <item quantity="other">Exported %d rules</item>
+    </plurals>
+    <plurals name="rules_imported">
+        <item quantity="one">Imported %d rule</item>
+        <item quantity="other">Imported %d rules</item>
+    </plurals>
+    <string name="rules_export_failed">Export failed: %1$s</string>
+    <string name="rules_import_failed">Import failed: %1$s</string>
+</resources>

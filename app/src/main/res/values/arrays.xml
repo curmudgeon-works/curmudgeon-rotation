@@ -1,0 +1,38 @@
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+<resources>
+    <string-array name="detection_method_entries">
+        <item>@string/detection_accessibility</item>
+        <item>@string/detection_usage_stats</item>
+    </string-array>
+    <string-array name="detection_method_values" translatable="false">
+        <item>accessibility</item>
+        <item>usage_stats</item>
+    </string-array>
+
+    <string-array name="tile_cycle_entries">
+        <item>@string/tile_cycle_apl</item>
+        <item>@string/tile_cycle_aplr</item>
+    </string-array>
+    <string-array name="tile_cycle_values" translatable="false">
+        <item>apl</item>
+        <item>aplr</item>
+    </string-array>
+
+    <string-array name="tile_mechanism_entries">
+        <item>@string/mechanism_system</item>
+        <item>@string/mechanism_overlay</item>
+    </string-array>
+    <string-array name="tile_mechanism_values" translatable="false">
+        <item>system</item>
+        <item>overlay</item>
+    </string-array>
+
+    <string-array name="overlay_type_entries">
+        <item>@string/overlay_type_accessibility</item>
+        <item>@string/overlay_type_application</item>
+    </string-array>
+    <string-array name="overlay_type_values" translatable="false">
+        <item>accessibility</item>
+        <item>application</item>
+    </string-array>
+</resources>

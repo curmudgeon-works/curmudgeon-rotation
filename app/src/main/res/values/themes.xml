@@ -1,0 +1,50 @@
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+<resources>
+    <style name="Theme.Curmudgeon" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">@color/surface</item>
+        <item name="colorPrimaryDark">@color/background</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="colorControlNormal">@color/text_secondary</item>
+        <item name="colorControlActivated">@color/accent</item>
+        <item name="android:colorBackground">@color/background</item>
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:textColorPrimary">@color/text</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.Curmudgeon.Dialog</item>
+        <item name="toolbarStyle">@style/Widget.Curmudgeon.Toolbar</item>
+    </style>
+
+    <style name="ThemeOverlay.Curmudgeon.Dialog" parent="ThemeOverlay.AppCompat.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/bg_card</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:textColorPrimary">@color/text</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+    </style>
+
+    <style name="Widget.Curmudgeon.Toolbar" parent="Widget.AppCompat.Toolbar">
+        <item name="android:background">@color/background</item>
+        <item name="titleTextColor">@color/text</item>
+    </style>
+
+    <style name="Widget.Curmudgeon.Button" parent="Widget.AppCompat.Button.Colored">
+        <item name="android:textColor">@color/background</item>
+    </style>
+
+    <style name="Widget.Curmudgeon.Button.Text" parent="Widget.AppCompat.Button.Borderless.Colored">
+        <item name="android:textColor">@color/accent</item>
+    </style>
+
+    <style name="TextAppearance.Curmudgeon.Section" parent="TextAppearance.AppCompat.Small">
+        <item name="android:textColor">@color/accent</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.08</item>
+    </style>
+
+    <style name="Curmudgeon.Card" parent="">
+        <item name="android:background">@drawable/bg_card</item>
+        <item name="android:padding">@dimen/card_padding</item>
+    </style>
+</resources>

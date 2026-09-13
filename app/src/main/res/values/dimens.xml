@@ -1,0 +1,9 @@
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+<resources>
+    <dimen name="screen_padding">16dp</dimen>
+    <dimen name="card_padding">16dp</dimen>
+    <dimen name="section_gap">24dp</dimen>
+    <dimen name="icon_size">40dp</dimen>
+    <dimen name="option_padding">8dp</dimen>
+    <dimen name="dialog_padding">24dp</dimen>
+</resources>
