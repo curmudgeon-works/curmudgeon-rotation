@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+<!-- Defaults must match Prefs.kt. Which keys show in Simple mode: SimpleModeFilter.SIMPLE_KEYS. -->
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:key="category_detection"
+        app:title="@string/pref_category_detection_method">
+
+        <ListPreference
+            app:defaultValue="accessibility"
+            app:entries="@array/detection_method_entries"
+            app:entryValues="@array/detection_method_values"
+            app:iconSpaceReserved="false"
+            app:key="detection_method"
+            app:title="@string/pref_detection_method"
+            app:useSimpleSummaryProvider="true" />
+
+        <SwitchPreferenceCompat
+            app:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:key="ignore_launcher"
+            app:summary="@string/pref_ignore_launcher_summary"
+            app:title="@string/pref_ignore_launcher" />
+
+        <EditTextPreference
+            app:defaultValue=""
+            app:dialogMessage="@string/pref_ignored_packages_message"
+            app:iconSpaceReserved="false"
+            app:key="ignored_packages"
+            app:title="@string/pref_ignored_packages" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:key="category_timing"
+        app:title="@string/pref_category_timing">
+
+        <EditTextPreference
+            app:defaultValue="300"
+            app:dialogMessage="@string/pref_debounce_message"
+            app:iconSpaceReserved="false"
+            app:key="debounce_ms"
+            app:title="@string/pref_debounce" />
+
+        <EditTextPreference
+            app:defaultValue="1000"
+            app:dialogMessage="@string/pref_poll_interval_message"
+            app:iconSpaceReserved="false"
+            app:key="poll_interval_ms"
+            app:title="@string/pref_poll_interval" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:key="category_startup"
+        app:title="@string/pref_category_startup">
+
+        <SwitchPreferenceCompat
+            app:defaultValue="false"
+            app:iconSpaceReserved="false"
+            app:key="start_on_boot"
+            app:summary="@string/pref_start_on_boot_summary"
+            app:title="@string/pref_start_on_boot" />
+    </PreferenceCategory>
+</PreferenceScreen>

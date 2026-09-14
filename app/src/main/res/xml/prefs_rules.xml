@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+<!-- Which keys show in Simple mode: SimpleModeFilter.SIMPLE_KEYS. -->
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:key="category_backup"
+        app:title="@string/pref_category_backup">
+
+        <Preference
+            app:iconSpaceReserved="false"
+            app:key="export_rules"
+            app:summary="@string/pref_export_summary"
+            app:title="@string/pref_export" />
+
+        <Preference
+            app:iconSpaceReserved="false"
+            app:key="import_rules"
+            app:summary="@string/pref_import_summary"
+            app:title="@string/pref_import" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:key="category_screen_log"
+        app:title="@string/pref_category_screen_log">
+
+        <Preference
+            app:iconSpaceReserved="false"
+            app:key="recent_log"
+            app:summary="@string/pref_recent_log_summary"
+            app:title="@string/pref_recent_log" />
+    </PreferenceCategory>
+</PreferenceScreen>

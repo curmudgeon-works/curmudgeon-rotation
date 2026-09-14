@@ -31,7 +31,8 @@ Built for two annoyances:
 - Transient windows (keyboard, system UI, notification shade, share sheet, optionally the
   launcher, plus your own ignore list) never switch rules; debounce against flicker.
 - Export / import rules as JSON through the system file picker.
-- Simple / Advanced settings.
+- Settings in sections (app detection, rotation, tile, rules) with a Simple / Advanced switch and
+  search across every setting.
 
 ## Permissions and why
 

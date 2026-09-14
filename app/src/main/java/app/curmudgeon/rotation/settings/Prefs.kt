@@ -9,7 +9,7 @@ import app.curmudgeon.rotation.orientation.OrientationMode
 import app.curmudgeon.rotation.orientation.SystemRotation
 import app.curmudgeon.rotation.orientation.SystemRotationStateStore
 
-/** Keys of user-visible settings; must match res/xml/preferences.xml. */
+/** Keys of user-visible settings; must match the res/xml/prefs_*.xml settings screens. */
 object PrefKeys {
     const val ADVANCED_MODE = "advanced_mode"
     const val DETECTION_METHOD = "detection_method"

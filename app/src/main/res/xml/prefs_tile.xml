@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+<!-- Defaults must match Prefs.kt. Which keys show in Simple mode: SimpleModeFilter.SIMPLE_KEYS. -->
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ListPreference
+        app:defaultValue="apl"
+        app:entries="@array/tile_cycle_entries"
+        app:entryValues="@array/tile_cycle_values"
+        app:iconSpaceReserved="false"
+        app:key="tile_cycle"
+        app:title="@string/pref_tile_cycle"
+        app:useSimpleSummaryProvider="true" />
+
+    <SwitchPreferenceCompat
+        app:defaultValue="false"
+        app:iconSpaceReserved="false"
+        app:key="quick_actions_notification"
+        app:summary="@string/pref_quick_actions_summary"
+        app:title="@string/pref_quick_actions" />
+</PreferenceScreen>

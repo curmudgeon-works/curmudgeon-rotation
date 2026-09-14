@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+<!-- Defaults must match Prefs.kt. Which keys show in Simple mode: SimpleModeFilter.SIMPLE_KEYS. -->
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:key="category_rule_end"
+        app:title="@string/pref_category_rule_end">
+
+        <SwitchPreferenceCompat
+            app:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:key="restore_on_leave"
+            app:summary="@string/pref_restore_summary"
+            app:title="@string/pref_restore" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:key="category_mechanism"
+        app:title="@string/pref_category_mechanism">
+
+        <ListPreference
+            app:defaultValue="system"
+            app:entries="@array/tile_mechanism_entries"
+            app:entryValues="@array/tile_mechanism_values"
+            app:iconSpaceReserved="false"
+            app:key="tile_mechanism"
+            app:title="@string/pref_tile_mechanism"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:defaultValue="accessibility"
+            app:entries="@array/overlay_type_entries"
+            app:entryValues="@array/overlay_type_values"
+            app:iconSpaceReserved="false"
+            app:key="overlay_type"
+            app:title="@string/pref_overlay_type"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+</PreferenceScreen>
