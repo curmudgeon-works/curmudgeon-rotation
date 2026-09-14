@@ -32,6 +32,7 @@ import app.curmudgeon.rotation.rules.RuleAction
 import app.curmudgeon.rotation.rules.RuleStore
 import app.curmudgeon.rotation.rules.normalizeActivityName
 import app.curmudgeon.rotation.settings.OverlayType
+import app.curmudgeon.rotation.settings.DetectionMethod
 import app.curmudgeon.rotation.settings.Prefs
 
 /** Edits the rule for one app: the action, and optionally the screens (activities) it is limited to. */
@@ -203,6 +204,15 @@ class RuleEditorActivity : AppCompatActivity() {
             return
         }
         RuleStore.put(AppRule(targetPackage, action, if (limited) screens.toSet() else emptySet()))
+        // a rule only runs if the app can tell which app is in front: ask for that now if it is missing
+        if (action != RuleAction.FOLLOW_SYSTEM) {
+            val detectionReady = when (Prefs.detectionMethod) {
+                DetectionMethod.ACCESSIBILITY -> Permissions.isAccessibilityServiceEnabled(this)
+                DetectionMethod.USAGE_STATS -> Permissions.hasUsageAccess(this)
+            }
+            if (!detectionReady) startActivity(SetupActivity.intent(this,
+                if (Prefs.detectionMethod == DetectionMethod.ACCESSIBILITY) SetupTopic.ACCESSIBILITY else SetupTopic.USAGE_ACCESS))
+        }
         finish()
     }
 

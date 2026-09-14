@@ -85,6 +85,11 @@ object Prefs {
 
     val startOnBoot: Boolean get() = settings.getBoolean(PrefKeys.START_ON_BOOT, false)
 
+    /** The first-launch prompt for "Modify system settings" has been shown (shown once; the status card covers later). */
+    var askedWriteSettings: Boolean
+        get() = state.getBoolean("asked_write_settings", false)
+        set(value) = state.edit { putBoolean("asked_write_settings", value) }
+
     /** Set by the tile service when the tile is added or removed; there is no API to query it. */
     var tileAdded: Boolean
         get() = state.getBoolean("tile_added", false)

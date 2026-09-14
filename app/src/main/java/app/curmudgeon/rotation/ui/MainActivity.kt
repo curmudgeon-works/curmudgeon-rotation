@@ -47,6 +47,11 @@ class MainActivity : AppCompatActivity() {
         RuleStore.addListener(onChange)
         OrientationController.addListener(onChange)
         render()
+        // the one permission everything needs: ask on first launch, then leave it to the status card
+        if (!Permissions.canWriteSettings(this) && !Prefs.askedWriteSettings) {
+            Prefs.askedWriteSettings = true
+            openSetup(SetupTopic.WRITE_SETTINGS)
+        }
     }
 
     override fun onPause() {
