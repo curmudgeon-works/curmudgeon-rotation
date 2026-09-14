@@ -14,16 +14,26 @@
     <string name="detection_usage_stats">Usage access polling</string>
     <string name="overlay_type_accessibility">Accessibility overlay (no extra permission)</string>
     <string name="overlay_type_application">App overlay (Display over other apps)</string>
-    <string name="tile_cycle_apl">Off → Auto → Portrait → Landscape</string>
-    <string name="tile_cycle_aplr">Off → Auto → Portrait → Landscape → Reverse landscape</string>
+    <string name="tile_action_flip">Flip portrait ⇄ landscape until you turn the phone back</string>
+    <string name="tile_action_toggle_orientation">Hard lock portrait ⇄ landscape (forces apps like HBO into landscape)</string>
+    <string name="tile_action_cycle">Cycle Off → Auto → Portrait → Landscape</string>
+    <string name="tile_action_cycle_with_reverse">Cycle Off → Auto → Portrait → Landscape → Reverse landscape</string>
+    <string name="tile_action_toggle_auto_rotate">Turn auto-rotate on / off</string>
+    <string name="tile_action_open_app">Open Curmudgeon Rotation</string>
 
     <!-- tile -->
-    <string name="tile_label">Rotation</string>
+    <string name="tile_label">Flip</string>
+    <!-- second tile: hard landscape lock, tap again to put the previous rotation back -->
+    <string name="tile_force_landscape_label">Lock</string>
     <string name="tile_needs_setup">Tap to set up</string>
     <!-- shown when Portrait/Landscape can only use the system setting, which apps may override -->
     <string name="main_current_mode_short">Current rotation: %1$s</string>
     <string name="main_hard_lock">%1$s (hard lock)</string>
     <string name="tile_soft_lock">%1$s (apps can override)</string>
+    <!-- a flip is waiting for the phone to be turned; %1$s is the locked mode -->
+    <string name="tile_flip_waiting">%1$s until you turn the phone</string>
+    <!-- a flip has turned; the previous rotation setting comes back when the phone is turned back -->
+    <string name="tile_flip_turned">Following the phone until you turn it back</string>
 
     <!-- accessibility service -->
     <string name="accessibility_service_label">Curmudgeon Rotation: per-app rules</string>
@@ -58,7 +68,7 @@
     <string name="status_fix">Fix</string>
     <string name="status_add">Add</string>
     <string name="status_tile">Quick Settings tile</string>
-    <string name="status_tile_ok">Added. Tap it to cycle rotation, long-press to open this app.</string>
+    <string name="status_tile_ok">Added. What tap and long-press do is set in Settings → Tile.</string>
     <string name="status_tile_missing">Not added yet</string>
     <string name="status_write_settings">Modify system settings</string>
     <string name="status_write_settings_ok">Allowed. The tile and rotation rules can change rotation.</string>
@@ -87,12 +97,12 @@
     <string name="setup_overlay_title">Allow the orientation overlay</string>
     <string name="setup_overlay_body">Some apps lock their own orientation (for example HBO Max stays portrait even with auto-rotate on). Changing system settings can\'t override that.\n\nThe \"force\" options add an invisible, zero-size window that asks Android for an orientation. It draws nothing and can\'t be touched.\n\nThat window can come from the accessibility service (no extra permission) or from \"Display over other apps\". Allow it on the next screen if you want to use app overlays or force rotation from the tile without the accessibility service.\n\nNote: on Android 12 and newer, apps can hide app overlays while they are open, so forcing may not work in every app. The accessibility overlay is not affected by that.</string>
     <string name="setup_accessibility_title">Per-app rules: accessibility service</string>
-    <string name="setup_accessibility_body">To switch rotation when you open a specific app, Curmudgeon Rotation needs to know which app is in front. Android provides this through an accessibility service.\n\nWhat it reads: only which app and screen is in front (the package name and the screen\'s class name, for example com.google.android.youtube).\n\nWhat it does not read: window content, text you type or see, passwords, notifications or gestures.\n\nWhat happens to it: it is used on your device to pick a rule. A short list of recently seen screens is kept in the app\'s private storage so you can limit rules to specific screens; you can view and clear it in settings. Nothing is transmitted. The app has no internet permission.\n\nThe same service can also hold the invisible overlay window used by the \"force\" rules.\n\nOn the next screen, find \"Curmudgeon Rotation: per-app rules\" under installed or downloaded apps and switch it on.\n\nIf the switch is greyed out (\"Restricted setting\"), Android is blocking it because the app was not installed from a store: open app info, tap the ⋮ menu, choose \"Allow restricted settings\", then try again.</string>
+    <string name="setup_accessibility_body">To switch rotation when you open a specific app, Curmudgeon Rotation needs to know which app is in front. Android provides this through an accessibility service.\n\nWhat it reads: only which app and screen is in front (the package name and the screen\'s class name, for example com.google.android.youtube).\n\nWhat it does not read: window content, text you type or see, passwords, notifications or gestures.\n\nWhat happens to it: it is used on your device to pick a rule. A short list of recently seen screens is kept in the app\'s private storage so you can limit rules to specific screens; you can view and clear it in settings. Nothing is transmitted. The app has no internet permission.\n\nThe same service also holds the invisible overlay window used by the Lock tile and the \"force\" rules, which is what turns apps that insist on portrait (like HBO Max) into landscape.\n\nOn the next screen, find \"Curmudgeon Rotation: per-app rules\" under installed or downloaded apps and switch it on.\n\nIf the switch is greyed out (\"Restricted setting\"), Android is blocking it because the app was not installed from a store: open app info, tap the ⋮ menu, choose \"Allow restricted settings\", then try again.</string>
     <string name="setup_accessibility_agree">I agree, open accessibility settings</string>
     <string name="setup_usage_title">Per-app rules: usage access</string>
     <string name="setup_usage_body">An alternative to the accessibility service. With usage access, Curmudgeon Rotation checks which app was opened most recently, once per poll interval (default 1 second), only while the screen is on.\n\nIt reacts a little slower than the accessibility service and needs a small ongoing notification so Android keeps it running.\n\nThe usage data is read on your device only to pick a rule. Nothing is transmitted. The app has no internet permission.\n\nOn the next screen, choose Curmudgeon Rotation and switch on \"Permit usage access\".</string>
     <string name="setup_tile_title">Add the Quick Settings tile</string>
-    <string name="setup_tile_body">One tap cycles: auto-rotate → locked portrait → locked landscape → auto-rotate off. Press and hold the tile to switch auto-rotate on or off.
+    <string name="setup_tile_body">Tap to flip between portrait and landscape. Turn the phone to match and the screen follows it; turn it back and your previous rotation setting returns. Press and hold the tile to switch auto-rotate on or off. Both can be changed in Settings → Tile.
 
 Choose the large tile size to see the current state written under the icon.
 
@@ -137,6 +147,7 @@ To add it yourself: swipe down twice from the top of the screen, tap the pencil 
     <string name="notification_mode">Rotation: %1$s</string>
     <string name="notification_reason_usage">watching for app changes</string>
     <string name="notification_reason_overlay">holding overlay orientation</string>
+    <string name="notification_reason_flip">waiting for you to turn the phone</string>
 
     <!-- settings -->
     <string name="settings_title">Settings</string>
@@ -151,7 +162,7 @@ To add it yourself: swipe down twice from the top of the screen, tap the pencil 
     <string name="settings_section_rotation">Rotation</string>
     <string name="settings_section_rotation_summary">Restoring rotation, system setting or overlay</string>
     <string name="settings_section_tile">Quick Settings tile</string>
-    <string name="settings_section_tile_summary">Cycle order, quick-actions notification</string>
+    <string name="settings_section_tile_summary">Tap and long-press actions, quick-actions notification</string>
     <string name="settings_section_rules">Rules</string>
     <string name="settings_section_rules_summary">Export, import, recently seen screens</string>
     <string name="pref_category_detection_method">Detection</string>
@@ -184,7 +195,10 @@ To add it yourself: swipe down twice from the top of the screen, tap the pencil 
     <string name="pref_restore_summary">Put back your previous auto-rotate and rotation when a rule stops applying. Skipped if you changed rotation yourself in the meantime.</string>
     <string name="pref_tile_mechanism">Tile and notification mechanism</string>
     <string name="pref_overlay_type">Overlay type</string>
-    <string name="pref_tile_cycle">Tile cycle order</string>
+    <string name="pref_tile_tap_action">Tile tap</string>
+    <string name="pref_tile_long_press_action">Tile long-press</string>
+    <string name="pref_lock_release_on_turn">Lock tile: release when you turn back</string>
+    <string name="pref_lock_release_on_turn_summary">After you have held the phone sideways, turning it upright ends the Lock and puts your previous rotation back. Off: Lock stays until you tap it again.</string>
     <string name="pref_quick_actions">Quick-actions notification</string>
     <string name="pref_quick_actions_summary">Ongoing notification with Portrait, Landscape and Auto buttons</string>
     <string name="pref_export">Export rules</string>

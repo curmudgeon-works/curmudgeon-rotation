@@ -9,13 +9,20 @@
         <item>usage_stats</item>
     </string-array>
 
-    <string-array name="tile_cycle_entries">
-        <item>@string/tile_cycle_apl</item>
-        <item>@string/tile_cycle_aplr</item>
+    <!-- values must match TileAction.value -->
+    <string-array name="tile_action_entries">
+        <item>@string/tile_action_flip</item>        <item>@string/tile_action_toggle_orientation</item>
+        <item>@string/tile_action_cycle</item>
+        <item>@string/tile_action_cycle_with_reverse</item>
+        <item>@string/tile_action_toggle_auto_rotate</item>
+        <item>@string/tile_action_open_app</item>
     </string-array>
-    <string-array name="tile_cycle_values" translatable="false">
-        <item>apl</item>
-        <item>aplr</item>
+    <string-array name="tile_action_values" translatable="false">
+        <item>flip</item>        <item>toggle_orientation</item>
+        <item>cycle</item>
+        <item>cycle_with_reverse</item>
+        <item>toggle_auto_rotate</item>
+        <item>open_app</item>
     </string-array>
 
     <string-array name="tile_mechanism_entries">

@@ -100,6 +100,7 @@ class RotationService : Service() {
             add(getString(R.string.notification_mode, getString(mode.labelRes())))
             if (usageStatsDetectionWanted(this@RotationService)) add(getString(R.string.notification_reason_usage))
             if (needsOverlayKeepAlive()) add(getString(R.string.notification_reason_overlay))
+            if (needsFlipKeepAlive()) add(getString(R.string.notification_reason_flip))
         }.joinToString(" · ")
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_rotation_auto)
@@ -154,8 +155,12 @@ class RotationService : Service() {
         private fun needsOverlayKeepAlive(): Boolean =
             OverlayHost.isUsingAppOverlay && !AccessibilityDetectionService.isConnected
 
+        /** The orientation sensor stops with the process too; the accessibility service keeps it alive when enabled. */
+        private fun needsFlipKeepAlive(): Boolean =
+            OrientationController.isWatchingSensor && !AccessibilityDetectionService.isConnected
+
         fun isNeeded(context: Context): Boolean =
-            usageStatsDetectionWanted(context) || Prefs.quickActionsNotification || needsOverlayKeepAlive()
+            usageStatsDetectionWanted(context) || Prefs.quickActionsNotification || needsOverlayKeepAlive() || needsFlipKeepAlive()
 
         /**
          * Starts, reconfigures or stops the service. Starting can be refused while the app is in the

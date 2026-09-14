@@ -12,8 +12,18 @@ Built for two annoyances:
 
 ## Features
 
-- **Quick Settings tile**: tap cycles Auto → Portrait → Landscape (optionally → Reverse
-  landscape); icon and subtitle show the current state; long-press opens the app. On
+- **Lock tile**: tap forces landscape with the hard lock (for apps like HBO Max that insist on
+  portrait); tap again and your previous rotation setting comes back. Optionally (off by
+  default) it also ends itself when you turn the phone upright after holding it sideways. Needs the accessibility
+  service (or "Display over other apps"); without it, the tap explains how to turn it on.
+- **Flip tile**: tap flips whatever is on screen (portrait ⇄ landscape) and holds
+  it until you turn the phone to match; the screen then follows the phone, and when you turn
+  it back your previous rotation setting returns, so nothing is left changed (fixes apps like
+  YouTube that sometimes won't rotate on their own). Long-press turns auto-rotate on / off
+  and clears any flip or Lock. Both are configurable: flip, lock portrait ⇄ landscape (the landscape
+  lock uses the hard lock, for apps like HBO Max), cycle Off → Auto → Portrait → Landscape
+  (optionally → Reverse landscape), toggle auto-rotate, or open the app. Icon and subtitle
+  show the current state. On
   Android 13+ the app can add the tile with one tap. Works without any per-app detection.
 - **Per-app rules**, optionally limited to specific screens (activities), e.g. only an app's
   video player. Actions:

@@ -15,14 +15,13 @@ import app.curmudgeon.rotation.orientation.OrientationController
 import app.curmudgeon.rotation.orientation.OrientationMode
 import app.curmudgeon.rotation.service.RotationService
 import app.curmudgeon.rotation.settings.Prefs
-import app.curmudgeon.rotation.ui.SetupActivity
-import app.curmudgeon.rotation.ui.SetupTopic
+import app.curmudgeon.rotation.ui.flipLabel
 import app.curmudgeon.rotation.ui.iconRes
 import app.curmudgeon.rotation.ui.labelRes
 
 /**
- * Tap cycles Off → Auto → Portrait → Landscape (→ Reverse landscape) → Off. Long-press is handled by
- * [TileLongPressActivity] (toggles auto-rotate). Works without the detection service.
+ * Tap runs the tap action from settings (default: flip until turned). Long-press is handled by
+ * [TileLongPressActivity]. Works without the detection service.
  *
  * When the mechanism's permission is missing the tile stays clickable (STATE_UNAVAILABLE tiles
  * receive no clicks) but shows "Tap to set up" and opens the explanation screen.
@@ -42,9 +41,9 @@ class RotationTileService : TileService() {
     }
 
     override fun onClick() {
-        val next = TileCycle.next(OrientationController.currentMode(), Prefs.tileCycleIncludesReverse)
-        if (!OrientationController.isManualAvailable() || !OrientationController.setManualMode(next)) {
-            openSetup()
+        val open = Prefs.tileTapAction.perform(this)
+        if (open != null) {
+            launch(open)
             return
         }
         RotationService.sync(this)
@@ -58,9 +57,11 @@ class RotationTileService : TileService() {
         if (available) {
             tile.icon = Icon.createWithResource(this, mode.iconRes())
             tile.state = if (mode == OrientationMode.OFF) Tile.STATE_INACTIVE else Tile.STATE_ACTIVE
-            val locked = mode == OrientationMode.PORTRAIT || mode == OrientationMode.LANDSCAPE || mode == OrientationMode.REVERSE_LANDSCAPE
-            val subtitle = getString(mode.labelRes())
-            setLabels(tile, if (locked && !OrientationController.isHardLockAvailable()) getString(R.string.tile_soft_lock, subtitle) else subtitle)
+            val subtitle = flipLabel(mode) ?: when {
+                mode.isLandscapeLock() && !OrientationController.isHardLockAvailable() -> getString(R.string.tile_soft_lock, getString(mode.labelRes()))
+                else -> getString(mode.labelRes())
+            }
+            setLabels(tile, subtitle)
         } else {
             tile.icon = Icon.createWithResource(this, R.drawable.ic_rotation_setup)
             tile.state = Tile.STATE_INACTIVE
@@ -80,9 +81,8 @@ class RotationTileService : TileService() {
     }
 
     @SuppressLint("StartActivityAndCollapseDeprecated")
-    private fun openSetup() {
-        val topic = SetupTopic.WRITE_SETTINGS
-        val intent = SetupActivity.intent(this, topic).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    private fun launch(activity: Intent) {
+        val intent = activity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             startActivityAndCollapse(PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE))
         } else {

@@ -9,7 +9,9 @@ object SimpleModeFilter {
     val SIMPLE_KEYS = setOf(
         PrefKeys.DETECTION_METHOD,
         PrefKeys.RESTORE_ON_LEAVE,
-        PrefKeys.TILE_CYCLE,
+        PrefKeys.TILE_TAP_ACTION,
+        PrefKeys.TILE_LONG_PRESS_ACTION,
+        PrefKeys.LOCK_RELEASE_ON_TURN,
         PrefKeys.EXPORT_RULES,
         PrefKeys.IMPORT_RULES,
         PrefKeys.ABOUT,

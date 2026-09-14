@@ -8,13 +8,16 @@ import androidx.preference.PreferenceManager
 import app.curmudgeon.rotation.orientation.OrientationMode
 import app.curmudgeon.rotation.orientation.SystemRotation
 import app.curmudgeon.rotation.orientation.SystemRotationStateStore
+import app.curmudgeon.rotation.tile.TileAction
 
 /** Keys of user-visible settings; must match the res/xml/prefs_*.xml settings screens. */
 object PrefKeys {
     const val ADVANCED_MODE = "advanced_mode"
     const val DETECTION_METHOD = "detection_method"
     const val RESTORE_ON_LEAVE = "restore_on_leave"
-    const val TILE_CYCLE = "tile_cycle"
+    const val TILE_TAP_ACTION = "tile_tap_action"
+    const val TILE_LONG_PRESS_ACTION = "tile_long_press_action"
+    const val LOCK_RELEASE_ON_TURN = "lock_release_on_turn"
     const val TILE_MECHANISM = "tile_mechanism"
     const val OVERLAY_TYPE = "overlay_type"
     const val IGNORE_LAUNCHER = "ignore_launcher"
@@ -64,7 +67,12 @@ object Prefs {
 
     val restoreOnLeave: Boolean get() = settings.getBoolean(PrefKeys.RESTORE_ON_LEAVE, true)
 
-    val tileCycleIncludesReverse: Boolean get() = settings.getString(PrefKeys.TILE_CYCLE, "apl") == "aplr"
+    val tileTapAction: TileAction get() = enumPref(PrefKeys.TILE_TAP_ACTION, TileAction.FLIP) { it.value }
+
+    /** The Lock tile ends itself when the phone is turned upright again (after being held sideways). */
+    val lockReleaseOnTurn: Boolean get() = settings.getBoolean(PrefKeys.LOCK_RELEASE_ON_TURN, false)
+
+    val tileLongPressAction: TileAction get() = enumPref(PrefKeys.TILE_LONG_PRESS_ACTION, TileAction.TOGGLE_AUTO_ROTATE) { it.value }
 
     val tileMechanism: TileMechanism
         get() = enumPref(PrefKeys.TILE_MECHANISM, TileMechanism.OVERLAY) { it.value }

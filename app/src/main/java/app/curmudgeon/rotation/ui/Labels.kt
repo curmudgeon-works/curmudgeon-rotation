@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package app.curmudgeon.rotation.ui
 
+import android.content.Context
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import app.curmudgeon.rotation.R
+import app.curmudgeon.rotation.orientation.FlipPhase
+import app.curmudgeon.rotation.orientation.OrientationController
 import app.curmudgeon.rotation.orientation.OrientationMode
 import app.curmudgeon.rotation.rules.RuleAction
 
@@ -14,6 +17,13 @@ fun OrientationMode.labelRes(): Int = when (this) {
     OrientationMode.PORTRAIT -> R.string.mode_portrait
     OrientationMode.LANDSCAPE -> R.string.mode_landscape
     OrientationMode.REVERSE_LANDSCAPE -> R.string.mode_reverse_landscape
+}
+
+/** Current-state text while a tile flip is running ([mode] is the current mode), or null when none is. */
+fun Context.flipLabel(mode: OrientationMode): String? = when (OrientationController.flipPhase) {
+    FlipPhase.TURNING -> getString(R.string.tile_flip_waiting, getString(mode.labelRes()))
+    FlipPhase.TURNED -> getString(R.string.tile_flip_turned)
+    null -> null
 }
 
 @DrawableRes

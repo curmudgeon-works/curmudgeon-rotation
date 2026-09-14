@@ -10,6 +10,7 @@ import app.curmudgeon.rotation.rules.RuleStore
 import app.curmudgeon.rotation.service.RotationService
 import app.curmudgeon.rotation.settings.PrefKeys
 import app.curmudgeon.rotation.settings.Prefs
+import app.curmudgeon.rotation.tile.LandscapeLockTileService
 import app.curmudgeon.rotation.tile.RotationTileService
 
 /** Wires the singletons together; everything runs in this one process. */
@@ -37,6 +38,10 @@ class CurmudgeonApp : Application() {
 
         Prefs.settings.registerOnSharedPreferenceChangeListener(settingsListener)
         RuleStore.addListener { ForegroundTracker.reevaluate() }
-        OrientationController.addListener { RotationTileService.requestUpdate(this) }
+        OrientationController.addListener {
+            RotationTileService.requestUpdate(this)
+            LandscapeLockTileService.requestUpdate(this)
+            RotationService.sync(this) // a finished flip no longer needs the service
+        }
     }
 }

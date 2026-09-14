@@ -19,13 +19,18 @@ enum class OrientationMode {
         REVERSE_LANDSCAPE -> SystemRotation(autoRotate = false, userRotation = Surface.ROTATION_270)
     }
 
-    /** Orientation for the overlay window (a hard lock apps cannot override), or null for OFF / AUTO (no window). */
+    /**
+     * Orientation for the overlay window (a hard lock apps cannot override), or null for no window. Portrait is
+     * never hard-locked: that would stop apps (YouTube full screen) from going landscape on their own.
+     */
     fun toOverlayOrientation(): Int? = when (this) {
-        OFF, AUTO -> null
-        PORTRAIT -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        OFF, AUTO, PORTRAIT -> null
         LANDSCAPE -> ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         REVERSE_LANDSCAPE -> ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
     }
+
+    /** Landscape locks are the ones the hard lock backs; portrait is always a plain system lock. */
+    fun isLandscapeLock(): Boolean = this == LANDSCAPE || this == REVERSE_LANDSCAPE
 
     companion object {
         fun fromSystemRotation(rotation: SystemRotation): OrientationMode = when {

@@ -4,13 +4,29 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <ListPreference
-        app:defaultValue="apl"
-        app:entries="@array/tile_cycle_entries"
-        app:entryValues="@array/tile_cycle_values"
+        app:defaultValue="flip"
+        app:entries="@array/tile_action_entries"
+        app:entryValues="@array/tile_action_values"
         app:iconSpaceReserved="false"
-        app:key="tile_cycle"
-        app:title="@string/pref_tile_cycle"
+        app:key="tile_tap_action"
+        app:title="@string/pref_tile_tap_action"
         app:useSimpleSummaryProvider="true" />
+
+    <ListPreference
+        app:defaultValue="toggle_auto_rotate"
+        app:entries="@array/tile_action_entries"
+        app:entryValues="@array/tile_action_values"
+        app:iconSpaceReserved="false"
+        app:key="tile_long_press_action"
+        app:title="@string/pref_tile_long_press_action"
+        app:useSimpleSummaryProvider="true" />
+
+    <SwitchPreferenceCompat
+        app:defaultValue="false"
+        app:iconSpaceReserved="false"
+        app:key="lock_release_on_turn"
+        app:summary="@string/pref_lock_release_on_turn_summary"
+        app:title="@string/pref_lock_release_on_turn" />
 
     <SwitchPreferenceCompat
         app:defaultValue="false"
