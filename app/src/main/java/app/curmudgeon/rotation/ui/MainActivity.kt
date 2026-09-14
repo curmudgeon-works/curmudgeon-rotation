@@ -15,6 +15,7 @@ import app.curmudgeon.rotation.databinding.ActivityMainBinding
 import app.curmudgeon.rotation.databinding.ItemStatusRowBinding
 import app.curmudgeon.rotation.detect.AccessibilityDetectionService
 import app.curmudgeon.rotation.orientation.OrientationController
+import app.curmudgeon.rotation.orientation.OrientationMode
 import app.curmudgeon.rotation.rules.RuleStore
 import app.curmudgeon.rotation.service.RotationService
 import app.curmudgeon.rotation.settings.DetectionMethod
@@ -73,11 +74,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun render() {
         renderStatus()
-        val mode = getString(OrientationController.currentMode().labelRes())
-        val mechanism = getString(
-            if (Prefs.tileMechanism == TileMechanism.SYSTEM_SETTING) R.string.mechanism_system else R.string.mechanism_overlay,
-        )
-        binding.currentMode.text = getString(R.string.main_current_mode, mode, mechanism)
+        val current = OrientationController.currentMode()
+        val mode = getString(current.labelRes())
+        val locked = current == OrientationMode.PORTRAIT || current == OrientationMode.LANDSCAPE || current == OrientationMode.REVERSE_LANDSCAPE
+        binding.currentMode.text = getString(R.string.main_current_mode_short,
+            if (!locked) mode else if (OrientationController.isHardLockAvailable()) getString(R.string.main_hard_lock, mode) else getString(R.string.tile_soft_lock, mode))
         val rules = RuleStore.all()
         rulesAdapter.submitList(rules)
         binding.rulesEmpty.isVisible = rules.isEmpty()

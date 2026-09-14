@@ -22,7 +22,7 @@
         app:title="@string/pref_category_mechanism">
 
         <ListPreference
-            app:defaultValue="system"
+            app:defaultValue="overlay"
             app:entries="@array/tile_mechanism_entries"
             app:entryValues="@array/tile_mechanism_values"
             app:iconSpaceReserved="false"

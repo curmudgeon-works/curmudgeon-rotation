@@ -52,7 +52,15 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- long-press on the Quick Settings tile -->
+        </activity>
+        <!-- long-press on the Quick Settings tile: toggles auto-rotate, no visible screen -->
+        <activity
+            android:name=".tile.TileLongPressActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
             </intent-filter>

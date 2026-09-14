@@ -3,22 +3,27 @@
     <string name="app_name">Curmudgeon Rotation</string>
 
     <!-- orientation modes -->
-    <string name="mode_auto">Auto</string>
-    <string name="mode_portrait">Portrait</string>
-    <string name="mode_landscape">Landscape</string>
+    <string name="mode_off">Auto-rotate off</string>
+    <string name="mode_auto">Auto-rotate</string>
+    <string name="mode_portrait">Locked portrait</string>
+    <string name="mode_landscape">Locked landscape</string>
     <string name="mode_reverse_landscape">Reverse landscape</string>
-    <string name="mechanism_system">System setting</string>
-    <string name="mechanism_overlay">Overlay</string>
+    <string name="mechanism_system">System setting only (apps can override locks)</string>
+    <string name="mechanism_overlay">System setting + hard lock when available</string>
     <string name="detection_accessibility">Accessibility service (recommended)</string>
     <string name="detection_usage_stats">Usage access polling</string>
     <string name="overlay_type_accessibility">Accessibility overlay (no extra permission)</string>
     <string name="overlay_type_application">App overlay (Display over other apps)</string>
-    <string name="tile_cycle_apl">Auto → Portrait → Landscape</string>
-    <string name="tile_cycle_aplr">Auto → Portrait → Landscape → Reverse landscape</string>
+    <string name="tile_cycle_apl">Off → Auto → Portrait → Landscape</string>
+    <string name="tile_cycle_aplr">Off → Auto → Portrait → Landscape → Reverse landscape</string>
 
     <!-- tile -->
     <string name="tile_label">Rotation</string>
     <string name="tile_needs_setup">Tap to set up</string>
+    <!-- shown when Portrait/Landscape can only use the system setting, which apps may override -->
+    <string name="main_current_mode_short">Current rotation: %1$s</string>
+    <string name="main_hard_lock">%1$s (hard lock)</string>
+    <string name="tile_soft_lock">%1$s (apps can override)</string>
 
     <!-- accessibility service -->
     <string name="accessibility_service_label">Curmudgeon Rotation: per-app rules</string>
@@ -87,7 +92,11 @@
     <string name="setup_usage_title">Per-app rules: usage access</string>
     <string name="setup_usage_body">An alternative to the accessibility service. With usage access, Curmudgeon Rotation checks which app was opened most recently, once per poll interval (default 1 second), only while the screen is on.\n\nIt reacts a little slower than the accessibility service and needs a small ongoing notification so Android keeps it running.\n\nThe usage data is read on your device only to pick a rule. Nothing is transmitted. The app has no internet permission.\n\nOn the next screen, choose Curmudgeon Rotation and switch on \"Permit usage access\".</string>
     <string name="setup_tile_title">Add the Quick Settings tile</string>
-    <string name="setup_tile_body">The Rotation tile switches between Auto, Portrait and Landscape with one tap. Long-press it to open this app.\n\nTo add it: swipe down twice from the top of the screen, tap the pencil (edit) icon, and drag \"Rotation\" into your active tiles.</string>
+    <string name="setup_tile_body">One tap cycles: auto-rotate → locked portrait → locked landscape → auto-rotate off. Press and hold the tile to switch auto-rotate on or off.
+
+Choose the large tile size to see the current state written under the icon.
+
+To add it yourself: swipe down twice from the top of the screen, tap the pencil (edit) icon, and drag \"Rotation\" into your active tiles.</string>
     <string name="setup_tile_add">Add tile</string>
 
     <!-- app picker -->

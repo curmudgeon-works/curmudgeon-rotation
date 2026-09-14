@@ -31,32 +31,39 @@ object OrientationController {
         session = SystemRotationSession(systemSettings, Prefs.rotationStateStore)
     }
 
-    /** Mode shown on the tile and notification for the configured tile mechanism. */
-    fun currentMode(): OrientationMode = when (Prefs.tileMechanism) {
-        TileMechanism.SYSTEM_SETTING -> OrientationMode.fromSystemRotation(systemSettings.read())
-        TileMechanism.OVERLAY -> Prefs.manualOverlayMode
+    /**
+     * Mode shown on the tile and notification: the last manual choice while the system still matches it,
+     * otherwise what the system setting says (someone changed rotation elsewhere).
+     */
+    fun currentMode(): OrientationMode {
+        val system = OrientationMode.fromSystemRotation(systemSettings.read())
+        val manual = Prefs.manualMode
+        return if (ManualModeResolver.consistent(manual, system)) manual else system
     }
 
-    /** Whether the tile mechanism has what it needs (permission or a running overlay host). */
-    fun isManualAvailable(): Boolean = when (Prefs.tileMechanism) {
-        TileMechanism.SYSTEM_SETTING -> systemSettings.canWrite()
-        TileMechanism.OVERLAY -> OverlayHost.isAvailable(appContext)
-    }
+    /** The tile needs "Modify system settings"; the overlay hard lock is an optional extra. */
+    fun isManualAvailable(): Boolean = systemSettings.canWrite()
 
-    /** Switches rotation on the user's explicit request. Returns false if the mechanism is unavailable. */
+    /** Whether Portrait / Landscape are hard locks (overlay window) rather than plain system locks apps can override. */
+    fun isHardLockAvailable(): Boolean = Prefs.tileMechanism == TileMechanism.OVERLAY && OverlayHost.isAvailable(appContext)
+
+    /**
+     * Switches rotation on the user's explicit request (tile, long-press, notification): always the system
+     * setting, plus the overlay window for Portrait / Landscape when the hard lock is enabled and available.
+     * Returns false without "Modify system settings".
+     */
     fun setManualMode(mode: OrientationMode): Boolean {
-        val ok = when (Prefs.tileMechanism) {
-            TileMechanism.SYSTEM_SETTING -> systemSettings.canWrite().also { canWrite ->
-                if (canWrite) session.applyManual(mode.toSystemRotation(systemSettings.read()))
-            }
-            TileMechanism.OVERLAY -> {
-                Prefs.manualOverlayMode = mode
-                applyOverlay() || mode == OrientationMode.AUTO
-            }
-        }
+        if (!systemSettings.canWrite()) return false
+        session.applyManual(mode.toSystemRotation(systemSettings.read()))
+        Prefs.manualMode = mode
+        applyOverlay()
         notifyChanged()
-        return ok
+        return true
     }
+
+    /** Long-press on the tile: auto-rotate off when it is on, otherwise auto-rotate on (dropping any lock). */
+    fun toggleAutoRotate(): Boolean =
+        setManualMode(if (currentMode() == OrientationMode.AUTO) OrientationMode.OFF else OrientationMode.AUTO)
 
     /** Applies the action matched for the foreground window; null ends any rule-driven rotation. */
     fun applyRule(action: RuleAction?) {
@@ -78,7 +85,7 @@ object OrientationController {
     fun removeListener(listener: () -> Unit) = listeners.remove(listener)
 
     private fun applyOverlay(): Boolean {
-        val manual = if (Prefs.tileMechanism == TileMechanism.OVERLAY) Prefs.manualOverlayMode.toOverlayOrientation() else null
+        val manual = if (Prefs.tileMechanism == TileMechanism.OVERLAY) Prefs.manualMode.toOverlayOrientation() else null
         return OverlayHost.set(appContext, ruleOverlay ?: manual)
     }
 

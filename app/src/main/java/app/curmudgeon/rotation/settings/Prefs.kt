@@ -67,7 +67,7 @@ object Prefs {
     val tileCycleIncludesReverse: Boolean get() = settings.getString(PrefKeys.TILE_CYCLE, "apl") == "aplr"
 
     val tileMechanism: TileMechanism
-        get() = enumPref(PrefKeys.TILE_MECHANISM, TileMechanism.SYSTEM_SETTING) { it.value }
+        get() = enumPref(PrefKeys.TILE_MECHANISM, TileMechanism.OVERLAY) { it.value }
 
     val overlayType: OverlayType
         get() = enumPref(PrefKeys.OVERLAY_TYPE, OverlayType.ACCESSIBILITY) { it.value }
@@ -95,11 +95,11 @@ object Prefs {
         get() = state.getBoolean("tile_added", false)
         set(value) = state.edit { putBoolean("tile_added", value) }
 
-    /** Mode chosen from the tile/notification when the tile uses the overlay mechanism. */
-    var manualOverlayMode: OrientationMode
-        get() = state.getString("manual_overlay_mode", null)
-            ?.let { name -> OrientationMode.entries.firstOrNull { it.name == name } } ?: OrientationMode.AUTO
-        set(value) = state.edit { putString("manual_overlay_mode", value.name) }
+    /** Last mode chosen from the tile, its long-press or the notification. */
+    var manualMode: OrientationMode
+        get() = state.getString("manual_mode", null)
+            ?.let { name -> OrientationMode.entries.firstOrNull { it.name == name } } ?: OrientationMode.OFF
+        set(value) = state.edit { putString("manual_mode", value.name) }
 
     val rotationStateStore: SystemRotationStateStore = object : SystemRotationStateStore {
         override var snapshot: SystemRotation?

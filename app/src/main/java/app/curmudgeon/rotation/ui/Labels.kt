@@ -9,6 +9,7 @@ import app.curmudgeon.rotation.rules.RuleAction
 
 @StringRes
 fun OrientationMode.labelRes(): Int = when (this) {
+    OrientationMode.OFF -> R.string.mode_off
     OrientationMode.AUTO -> R.string.mode_auto
     OrientationMode.PORTRAIT -> R.string.mode_portrait
     OrientationMode.LANDSCAPE -> R.string.mode_landscape
@@ -17,6 +18,7 @@ fun OrientationMode.labelRes(): Int = when (this) {
 
 @DrawableRes
 fun OrientationMode.iconRes(): Int = when (this) {
+    OrientationMode.OFF -> R.drawable.ic_rotation_off
     OrientationMode.AUTO -> R.drawable.ic_rotation_auto
     OrientationMode.PORTRAIT -> R.drawable.ic_rotation_portrait
     OrientationMode.LANDSCAPE -> R.drawable.ic_rotation_landscape

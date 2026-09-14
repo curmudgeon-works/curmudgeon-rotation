@@ -113,9 +113,10 @@ class RotationService : Service() {
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .apply {
                 if (Prefs.quickActionsNotification) {
+                    addModeAction(OrientationMode.AUTO)
                     addModeAction(OrientationMode.PORTRAIT)
                     addModeAction(OrientationMode.LANDSCAPE)
-                    addModeAction(OrientationMode.AUTO)
+                    addModeAction(OrientationMode.OFF)
                 }
             }
             .build()

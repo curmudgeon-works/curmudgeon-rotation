@@ -15,14 +15,14 @@ import app.curmudgeon.rotation.orientation.OrientationController
 import app.curmudgeon.rotation.orientation.OrientationMode
 import app.curmudgeon.rotation.service.RotationService
 import app.curmudgeon.rotation.settings.Prefs
-import app.curmudgeon.rotation.settings.TileMechanism
 import app.curmudgeon.rotation.ui.SetupActivity
 import app.curmudgeon.rotation.ui.SetupTopic
 import app.curmudgeon.rotation.ui.iconRes
 import app.curmudgeon.rotation.ui.labelRes
 
 /**
- * Tap cycles Auto → Portrait → Landscape (→ Reverse landscape). Works without the detection service.
+ * Tap cycles Off → Auto → Portrait → Landscape (→ Reverse landscape) → Off. Long-press is handled by
+ * [TileLongPressActivity] (toggles auto-rotate). Works without the detection service.
  *
  * When the mechanism's permission is missing the tile stays clickable (STATE_UNAVAILABLE tiles
  * receive no clicks) but shows "Tap to set up" and opens the explanation screen.
@@ -57,8 +57,10 @@ class RotationTileService : TileService() {
         val mode = OrientationController.currentMode()
         if (available) {
             tile.icon = Icon.createWithResource(this, mode.iconRes())
-            tile.state = if (mode == OrientationMode.AUTO) Tile.STATE_INACTIVE else Tile.STATE_ACTIVE
-            setLabels(tile, getString(mode.labelRes()))
+            tile.state = if (mode == OrientationMode.OFF) Tile.STATE_INACTIVE else Tile.STATE_ACTIVE
+            val locked = mode == OrientationMode.PORTRAIT || mode == OrientationMode.LANDSCAPE || mode == OrientationMode.REVERSE_LANDSCAPE
+            val subtitle = getString(mode.labelRes())
+            setLabels(tile, if (locked && !OrientationController.isHardLockAvailable()) getString(R.string.tile_soft_lock, subtitle) else subtitle)
         } else {
             tile.icon = Icon.createWithResource(this, R.drawable.ic_rotation_setup)
             tile.state = Tile.STATE_INACTIVE
@@ -79,10 +81,7 @@ class RotationTileService : TileService() {
 
     @SuppressLint("StartActivityAndCollapseDeprecated")
     private fun openSetup() {
-        val topic = when (Prefs.tileMechanism) {
-            TileMechanism.SYSTEM_SETTING -> SetupTopic.WRITE_SETTINGS
-            TileMechanism.OVERLAY -> SetupTopic.OVERLAY
-        }
+        val topic = SetupTopic.WRITE_SETTINGS
         val intent = SetupActivity.intent(this, topic).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             startActivityAndCollapse(PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE))
