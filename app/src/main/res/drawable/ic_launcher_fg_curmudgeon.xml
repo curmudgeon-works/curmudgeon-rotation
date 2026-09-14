@@ -3,10 +3,10 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp"
     android:viewportWidth="108" android:viewportHeight="108">
-    <path android:fillColor="#00000000" android:strokeColor="#ECE8DF" android:strokeAlpha="0.275" android:strokeWidth="4.75" android:pathData="M30.19,41.63 A26.27,26.27 0 0 1 77.81,41.63"/>
-    <path android:fillColor="#ECE8DF" android:fillAlpha="0.275" android:pathData="M81.02,48.52 L84.01,38.74 L71.61,44.52 Z"/>
-    <path android:fillColor="#00000000" android:strokeColor="#ECE8DF" android:strokeAlpha="0.275" android:strokeWidth="4.75" android:pathData="M77.81,63.84 A26.27,26.27 0 0 1 30.19,63.84"/>
-    <path android:fillColor="#ECE8DF" android:fillAlpha="0.275" android:pathData="M26.98,56.95 L23.99,66.73 L36.39,60.95 Z"/>
+    <path android:fillColor="#00000000" android:strokeColor="#ECE8DF" android:strokeAlpha="0.275" android:strokeWidth="4.75" android:pathData="M30.19,42.90 A26.27,26.27 0 0 1 77.81,42.90"/>
+    <path android:fillColor="#ECE8DF" android:fillAlpha="0.275" android:pathData="M81.02,49.78 L84.01,40.01 L71.61,45.79 Z"/>
+    <path android:fillColor="#00000000" android:strokeColor="#ECE8DF" android:strokeAlpha="0.275" android:strokeWidth="4.75" android:pathData="M77.81,65.10 A26.27,26.27 0 0 1 30.19,65.10"/>
+    <path android:fillColor="#ECE8DF" android:fillAlpha="0.275" android:pathData="M26.98,58.22 L23.99,67.99 L36.39,62.21 Z"/>
     <path android:fillColor="#ECE8DF" android:pathData="M44.08,31.36 L69.16,34.89 L68.67,38.34 L43.59,34.81 Z"/>
     <path android:fillColor="#E2884F" android:pathData="M55.33 76.00Q51.81 76.00 49.10 74.70Q46.40 73.40 44.52 71.10Q42.63 68.80 41.67 65.68Q40.71 62.55 40.71 58.95Q40.71 54.79 41.86 51.57Q43.01 48.35 44.94 46.19Q46.87 44.04 49.43 42.93Q51.99 41.81 54.77 41.81Q56.28 41.81 57.43 42.12Q58.58 42.43 59.43 42.90Q60.27 43.38 60.84 43.97Q61.40 44.56 61.68 45.13H61.97V42.38H67.42V52.89H61.97V50.76Q61.97 48.35 60.39 46.88Q58.82 45.41 55.80 45.41Q52.65 45.41 50.87 47.40Q49.08 49.39 49.08 53.65V63.26Q49.08 65.49 49.64 67.05Q50.21 68.61 51.22 69.66Q52.23 70.70 53.62 71.17Q55.00 71.64 56.65 71.64Q59.66 71.64 61.76 70.06Q63.85 68.47 64.93 65.77L67.61 67.33Q67.00 69.13 65.87 70.72Q64.74 72.31 63.17 73.49Q61.59 74.67 59.61 75.34Q57.64 76.00 55.33 76.00Z"/>
 </vector>
