@@ -49,12 +49,16 @@ enum class TileAction(val value: String) {
     fun perform(context: Context): Intent? {
         val done = when (this) {
             OPEN_APP -> return Intent(context, MainActivity::class.java)
-            FLIP -> OrientationController.flip()            else -> OrientationController.setManualMode(
-                target(OrientationController.currentMode(), OrientationController.isDisplayLandscape())!!,
-            )
+            FLIP -> OrientationController.flip()
+            // a tile lit by a running flip goes dark on tap: the flip ends where it started
+            TOGGLE_AUTO_ROTATE -> if (OrientationController.flipPhase != null) OrientationController.cancelFlip() else setMode()
+            else -> setMode()
         }
         return if (done) null else SetupActivity.intent(context, SetupTopic.WRITE_SETTINGS)
     }
+
+    private fun setMode(): Boolean =
+        OrientationController.setManualMode(target(OrientationController.currentMode(), OrientationController.isDisplayLandscape())!!)
 
     companion object {
         private val CYCLE_ORDER = listOf(OrientationMode.OFF, OrientationMode.AUTO, OrientationMode.PORTRAIT, OrientationMode.LANDSCAPE)

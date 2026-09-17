@@ -13,12 +13,12 @@
         app:useSimpleSummaryProvider="true" />
 
     <ListPreference
-        app:defaultValue="toggle_auto_rotate"
-        app:entries="@array/tile_action_entries"
-        app:entryValues="@array/tile_action_values"
+        app:defaultValue="landscape"
+        app:entries="@array/lock_tap_action_entries"
+        app:entryValues="@array/lock_tap_action_values"
         app:iconSpaceReserved="false"
-        app:key="tile_long_press_action"
-        app:title="@string/pref_tile_long_press_action"
+        app:key="lock_tap_action"
+        app:title="@string/pref_lock_tap_action"
         app:useSimpleSummaryProvider="true" />
 
     <SwitchPreferenceCompat

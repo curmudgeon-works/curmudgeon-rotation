@@ -16,12 +16,12 @@ import app.curmudgeon.rotation.orientation.OrientationMode
 import app.curmudgeon.rotation.service.RotationService
 import app.curmudgeon.rotation.settings.Prefs
 import app.curmudgeon.rotation.ui.flipLabel
-import app.curmudgeon.rotation.ui.iconRes
 import app.curmudgeon.rotation.ui.labelRes
 
 /**
- * Tap runs the tap action from settings (default: flip until turned). Long-press is handled by
- * [TileLongPressActivity]. Works without the detection service.
+ * Tap runs the tap action from settings (default: toggle auto-rotate). Long-press opens the app: the system
+ * launches an activity for it, which ejects a fullscreen app to picture-in-picture, so no rotation action can
+ * live there. Works without the detection service.
  *
  * When the mechanism's permission is missing the tile stays clickable (STATE_UNAVAILABLE tiles
  * receive no clicks) but shows "Tap to set up" and opens the explanation screen.
@@ -35,9 +35,17 @@ class RotationTileService : TileService() {
         Prefs.tileAdded = false
     }
 
+    // requestListeningState does nothing while the panel already shows the tile, so a flip ending then redraws it here
+    private val onRotationChanged: () -> Unit = { updateTile() }
+
     override fun onStartListening() {
         Prefs.tileAdded = true
+        OrientationController.addListener(onRotationChanged)
         updateTile()
+    }
+
+    override fun onStopListening() {
+        OrientationController.removeListener(onRotationChanged)
     }
 
     override fun onClick() {
@@ -55,8 +63,15 @@ class RotationTileService : TileService() {
         val available = OrientationController.isManualAvailable()
         val mode = OrientationController.currentMode()
         if (available) {
-            tile.icon = Icon.createWithResource(this, mode.iconRes())
-            tile.state = if (mode == OrientationMode.OFF) Tile.STATE_INACTIVE else Tile.STATE_ACTIVE
+            // the auto-rotate icon, lit while auto-rotate is on; a running flip swaps in the flip icon, lit until the start is back
+            val flipping = OrientationController.flipPhase != null
+            tile.icon = Icon.createWithResource(this, if (flipping) R.drawable.ic_rotation_off else R.drawable.ic_rotation_auto)
+            val active = flipping || when (Prefs.tileTapAction) {
+                TileAction.FLIP -> false
+                TileAction.TOGGLE_AUTO_ROTATE -> mode == OrientationMode.AUTO
+                else -> mode != OrientationMode.OFF
+            }
+            tile.state = if (active) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
             val subtitle = flipLabel(mode) ?: when {
                 mode.isLandscapeLock() && !OrientationController.isHardLockAvailable() -> getString(R.string.tile_soft_lock, getString(mode.labelRes()))
                 else -> getString(mode.labelRes())

@@ -16,7 +16,7 @@ object PrefKeys {
     const val DETECTION_METHOD = "detection_method"
     const val RESTORE_ON_LEAVE = "restore_on_leave"
     const val TILE_TAP_ACTION = "tile_tap_action"
-    const val TILE_LONG_PRESS_ACTION = "tile_long_press_action"
+    const val LOCK_TAP_ACTION = "lock_tap_action"
     const val LOCK_RELEASE_ON_TURN = "lock_release_on_turn"
     const val TILE_MECHANISM = "tile_mechanism"
     const val OVERLAY_TYPE = "overlay_type"
@@ -35,6 +35,9 @@ object PrefKeys {
 enum class DetectionMethod(val value: String) { ACCESSIBILITY("accessibility"), USAGE_STATS("usage_stats") }
 
 enum class TileMechanism(val value: String) { SYSTEM_SETTING("system"), OVERLAY("overlay") }
+
+/** Lock tile tap: hold landscape until tapped again, or cycle the four locked orientations then release. */
+enum class LockTapAction(val value: String) { LANDSCAPE("landscape"), CYCLE("cycle") }
 
 enum class OverlayType(val value: String) { ACCESSIBILITY("accessibility"), APPLICATION("application") }
 
@@ -67,12 +70,14 @@ object Prefs {
 
     val restoreOnLeave: Boolean get() = settings.getBoolean(PrefKeys.RESTORE_ON_LEAVE, true)
 
+    // the flip is the reason this tile exists, and stock Android already has an Auto-rotate tile; long-press can't
+    // carry it (see the manifest: long-press always launches an activity, ejecting fullscreen apps to PiP)
     val tileTapAction: TileAction get() = enumPref(PrefKeys.TILE_TAP_ACTION, TileAction.FLIP) { it.value }
+
+    val lockTapAction: LockTapAction get() = enumPref(PrefKeys.LOCK_TAP_ACTION, LockTapAction.LANDSCAPE) { it.value }
 
     /** The Lock tile ends itself when the phone is turned upright again (after being held sideways). */
     val lockReleaseOnTurn: Boolean get() = settings.getBoolean(PrefKeys.LOCK_RELEASE_ON_TURN, false)
-
-    val tileLongPressAction: TileAction get() = enumPref(PrefKeys.TILE_LONG_PRESS_ACTION, TileAction.TOGGLE_AUTO_ROTATE) { it.value }
 
     val tileMechanism: TileMechanism
         get() = enumPref(PrefKeys.TILE_MECHANISM, TileMechanism.OVERLAY) { it.value }

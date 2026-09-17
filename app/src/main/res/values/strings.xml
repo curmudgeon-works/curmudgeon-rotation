@@ -14,7 +14,7 @@
     <string name="detection_usage_stats">Usage access polling</string>
     <string name="overlay_type_accessibility">Accessibility overlay (no extra permission)</string>
     <string name="overlay_type_application">App overlay (Display over other apps)</string>
-    <string name="tile_action_flip">Flip portrait ⇄ landscape until you turn the phone back</string>
+    <string name="tile_action_flip">Rotate once: portrait ⇄ landscape until you turn the phone back</string>
     <string name="tile_action_toggle_orientation">Hard lock portrait ⇄ landscape (forces apps like HBO into landscape)</string>
     <string name="tile_action_cycle">Cycle Off → Auto → Portrait → Landscape</string>
     <string name="tile_action_cycle_with_reverse">Cycle Off → Auto → Portrait → Landscape → Reverse landscape</string>
@@ -22,7 +22,7 @@
     <string name="tile_action_open_app">Open Curmudgeon Rotation</string>
 
     <!-- tile -->
-    <string name="tile_label">Flip</string>
+    <string name="tile_label">Rotate</string>
     <!-- second tile: hard landscape lock, tap again to put the previous rotation back -->
     <string name="tile_force_landscape_label">Lock</string>
     <string name="tile_needs_setup">Tap to set up</string>
@@ -68,7 +68,7 @@
     <string name="status_fix">Fix</string>
     <string name="status_add">Add</string>
     <string name="status_tile">Quick Settings tile</string>
-    <string name="status_tile_ok">Added. What tap and long-press do is set in Settings → Tile.</string>
+    <string name="status_tile_ok">Added. What a tap does is set in Settings → Tile.</string>
     <string name="status_tile_missing">Not added yet</string>
     <string name="status_write_settings">Modify system settings</string>
     <string name="status_write_settings_ok">Allowed. The tile and rotation rules can change rotation.</string>
@@ -102,7 +102,7 @@
     <string name="setup_usage_title">Per-app rules: usage access</string>
     <string name="setup_usage_body">An alternative to the accessibility service. With usage access, Curmudgeon Rotation checks which app was opened most recently, once per poll interval (default 1 second), only while the screen is on.\n\nIt reacts a little slower than the accessibility service and needs a small ongoing notification so Android keeps it running.\n\nThe usage data is read on your device only to pick a rule. Nothing is transmitted. The app has no internet permission.\n\nOn the next screen, choose Curmudgeon Rotation and switch on \"Permit usage access\".</string>
     <string name="setup_tile_title">Add the Quick Settings tile</string>
-    <string name="setup_tile_body">Tap to flip between portrait and landscape. Turn the phone to match and the screen follows it; turn it back and your previous rotation setting returns. Press and hold the tile to switch auto-rotate on or off. Both can be changed in Settings → Tile.
+    <string name="setup_tile_body">Tap to rotate once: the screen turns to the other orientation, follows the phone while you hold it that way, and your previous rotation setting returns when you turn it back. What a tap does can be changed in Settings → Tile. Press and hold opens this app.
 
 Choose the large tile size to see the current state written under the icon.
 
@@ -162,7 +162,7 @@ To add it yourself: swipe down twice from the top of the screen, tap the pencil 
     <string name="settings_section_rotation">Rotation</string>
     <string name="settings_section_rotation_summary">Restoring rotation, system setting or overlay</string>
     <string name="settings_section_tile">Quick Settings tile</string>
-    <string name="settings_section_tile_summary">Tap and long-press actions, quick-actions notification</string>
+    <string name="settings_section_tile_summary">Tap actions, quick-actions notification</string>
     <string name="settings_section_rules">Rules</string>
     <string name="settings_section_rules_summary">Export, import, recently seen screens</string>
     <string name="pref_category_detection_method">Detection</string>
@@ -196,9 +196,11 @@ To add it yourself: swipe down twice from the top of the screen, tap the pencil 
     <string name="pref_tile_mechanism">Tile and notification mechanism</string>
     <string name="pref_overlay_type">Overlay type</string>
     <string name="pref_tile_tap_action">Tile tap</string>
-    <string name="pref_tile_long_press_action">Tile long-press</string>
+    <string name="pref_lock_tap_action">Lock tile tap</string>
+    <string name="lock_tap_landscape">Lock landscape; tap again to release</string>
+    <string name="lock_tap_cycle">Cycle locked Landscape → Upside down → Reverse landscape → Portrait, then release</string>
     <string name="pref_lock_release_on_turn">Lock tile: release when you turn back</string>
-    <string name="pref_lock_release_on_turn_summary">After you have held the phone sideways, turning it upright ends the Lock and puts your previous rotation back. Off: Lock stays until you tap it again.</string>
+    <string name="pref_lock_release_on_turn_summary">After you have held the phone sideways, turning it upright ends the Lock and puts your previous rotation back. Off: Lock stays until you tap it again. Landscape lock only.</string>
     <string name="pref_quick_actions">Quick-actions notification</string>
     <string name="pref_quick_actions_summary">Ongoing notification with Portrait, Landscape and Auto buttons</string>
     <string name="pref_export">Export rules</string>

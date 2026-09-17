@@ -3,20 +3,25 @@ package app.curmudgeon.rotation.detect
 
 /**
  * Decides which foreground changes may switch rules. Transient windows (keyboard, system UI and
- * notification shade, system dialogs, optionally the launcher) are skipped, so the rule of the
- * app underneath stays in effect instead of flickering off and on.
+ * notification shade, system dialogs, our own screens, optionally the launcher) are skipped, so the
+ * rule of the app underneath stays in effect instead of flickering off and on.
+ *
+ * Our own package is skipped because every screen of ours is a detour from the app the rules are
+ * about: opening settings, or the screen a tile long-press opens.
  *
  * The launcher is ignored by default because recents and app switching pass through it; launchers
  * usually lock their own orientation anyway.
  */
 class WindowFilter(
+    private val ownPackage: String,
     private val userIgnoredPackages: Set<String>,
     private val inputMethodPackages: Set<String>,
     private val launcherPackages: Set<String>,
     private val ignoreLauncher: Boolean,
 ) {
     fun accepts(packageName: String): Boolean =
-        packageName !in ALWAYS_IGNORED &&
+        packageName != ownPackage &&
+            packageName !in ALWAYS_IGNORED &&
             packageName !in userIgnoredPackages &&
             packageName !in inputMethodPackages &&
             !(ignoreLauncher && packageName in launcherPackages)

@@ -7,6 +7,7 @@ import org.junit.Test
 
 class WindowFilterTest {
     private fun filter(ignoreLauncher: Boolean) = WindowFilter(
+        ownPackage = "app.curmudgeon.rotation",
         userIgnoredPackages = setOf("com.facebook.orca"),
         inputMethodPackages = setOf("app.curmudgeon.keyboard"),
         launcherPackages = setOf("com.google.android.apps.nexuslauncher"),
@@ -25,6 +26,7 @@ class WindowFilterTest {
         assertFalse(filter.accepts("android"))
         assertFalse(filter.accepts("app.curmudgeon.keyboard"))
         assertFalse(filter.accepts("com.facebook.orca"))
+        assertFalse(filter.accepts("app.curmudgeon.rotation"))
     }
 
     @Test

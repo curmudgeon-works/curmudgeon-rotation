@@ -14,19 +14,36 @@ import app.curmudgeon.rotation.Permissions
 import app.curmudgeon.rotation.R
 import app.curmudgeon.rotation.orientation.OrientationController
 import app.curmudgeon.rotation.service.RotationService
+import app.curmudgeon.rotation.settings.LockTapAction
+import app.curmudgeon.rotation.settings.Prefs
 import app.curmudgeon.rotation.ui.SetupActivity
 import app.curmudgeon.rotation.ui.SetupTopic
 
 /**
  * Second tile ("Lock"), for apps that insist on portrait (HBO Max): tap forces landscape with the hard lock, tap again puts
- * the previous rotation back ([OrientationController.toggleForcedLandscape]). Long-press opens the app.
+ * the previous rotation back ([OrientationController.toggleForcedLandscape]); or, per settings, taps cycle the four
+ * hard-locked orientations and the fifth puts it back ([OrientationController.cycleForcedLock]). Long-press opens the app.
  * Without the permissions it needs, a tap opens the matching explanation screen instead.
  */
 class LandscapeLockTileService : TileService() {
-    override fun onStartListening() = updateTile()
+    // requestListeningState does nothing while the panel already shows the tile, so changes then redraw it here
+    private val onRotationChanged: () -> Unit = { updateTile() }
+
+    override fun onStartListening() {
+        OrientationController.addListener(onRotationChanged)
+        updateTile()
+    }
+
+    override fun onStopListening() {
+        OrientationController.removeListener(onRotationChanged)
+    }
 
     override fun onClick() {
-        if (OrientationController.toggleForcedLandscape()) {
+        val done = when (Prefs.lockTapAction) {
+            LockTapAction.LANDSCAPE -> OrientationController.toggleForcedLandscape()
+            LockTapAction.CYCLE -> OrientationController.cycleForcedLock()
+        }
+        if (done) {
             RotationService.sync(this)
             updateTile()
             return

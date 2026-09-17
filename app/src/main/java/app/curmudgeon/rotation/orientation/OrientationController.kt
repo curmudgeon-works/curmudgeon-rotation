@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package app.curmudgeon.rotation.orientation
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ActivityInfo
 import android.view.Surface
+import androidx.core.content.ContextCompat
 import app.curmudgeon.rotation.rules.RuleAction
 import app.curmudgeon.rotation.settings.Prefs
 import app.curmudgeon.rotation.settings.TileMechanism
@@ -24,8 +28,12 @@ object OrientationController {
     private lateinit var session: SystemRotationSession
     private var ruleOverlay: Int? = null
     private var flip: ActiveFlip? = null
+    /** The app rules were last evaluated for, or null without foreground detection. */
+    private var foregroundPackage: String? = null
     private var forcedFrom: FlipStart? = null
     private var forcedWritten: SystemRotation? = null
+    /** Where a cycling Lock is, or null for the plain landscape Lock (either landscape side). */
+    private var forcedStep: LockStep? = null
     private var forcedWatcher: TurnWatcher? = null
     private val listeners = CopyOnWriteArraySet<() -> Unit>()
 
@@ -34,6 +42,24 @@ object OrientationController {
         systemSettings = SystemRotationSettings(appContext)
         session = SystemRotationSession(systemSettings, Prefs.rotationStateStore)
         systemSettings.observe(::onSystemRotationChanged)
+        // only ever delivered while the process lives, which a waiting flip already needs
+        ContextCompat.registerReceiver(appContext, screenOffReceiver, IntentFilter(Intent.ACTION_SCREEN_OFF), ContextCompat.RECEIVER_NOT_EXPORTED)
+    }
+
+    /** The screen went off on a flip still waiting for its first turn: nobody is about to turn the phone, so it goes home. */
+    private val screenOffReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (flip?.phase == FlipPhase.TURNING) cancelFlip()
+        }
+    }
+
+    /**
+     * The foreground app changed, or detection stopped (null). Call before applying the new app's rule, so a flip
+     * left behind (see [ActiveFlip.leftBehindBy]) ends at its start first and the rule snapshots the real settings.
+     */
+    fun onForegroundChanged(packageName: String?) {
+        foregroundPackage = packageName
+        if (packageName != null && flip?.leftBehindBy(packageName) == true) cancelFlip()
     }
 
     /**
@@ -42,8 +68,8 @@ object OrientationController {
      * (with its hard lock) and nothing is restored later.
      */
     private fun onSystemRotationChanged() {
-        val written = flip?.written ?: forcedWritten ?: return
-        if (!written.isStillIn(systemSettings.read())) abandonFlip()
+        val written = flip?.written ?: forcedWritten
+        if (written != null && !written.isStillIn(systemSettings.read())) abandonFlip() else notifyChanged()
     }
 
     /**
@@ -81,23 +107,29 @@ object OrientationController {
     val flipPhase: FlipPhase? get() = flip?.phase
 
     /**
-     * Tile flip, a round trip that ends where it started:
-     * 1. locks the opposite of what the screen shows (never the hard lock);
-     * 2. once the phone is held that way, turns auto-rotate on so the screen follows the phone (if auto-rotate was
-     *    on to begin with, the flip is over here);
-     * 3. once the phone is turned back, restores the starting settings (a portrait lock ends as a portrait lock).
-     * No timeout: lying on your side the sensor never agrees, and holding the lock is then what you want.
-     * Tapping during a flip or Lock heads back toward the start: if that is where the starting lock points, it
-     * restores it; otherwise a new flip starts from the same start. A rotation change made elsewhere meanwhile ends
-     * the flip without restoring (see [onSystemRotationChanged]). Returns false without "Modify system settings".
+     * "Rotate once", a round trip that ends where it started:
+     * 1. locks the opposite of what the screen shows, with the hard lock when available, so apps that insist on
+     *    portrait (X, HBO Max) turn too;
+     * 2. once the phone is held that way, turns auto-rotate on, still holding the hard lock (either side of the
+     *    new orientation);
+     * 3. once the phone is turned back, restores the starting settings (a portrait lock ends as a portrait lock) and
+     *    drops the hard lock.
+     * No timeout: lying on your side the sensor never agrees, and holding the lock is then what you want. What ends a
+     * flip nobody is going to finish is leaving: another app coming to the front ([onForegroundChanged]) or the screen
+     * going off, while it still waits for the first turn, puts the start back.
+     * Doing it again during a flip ends it at the start. During Lock it heads back toward Lock's start: if that is
+     * where the starting lock points, it restores it; otherwise a flip starts from the same start. A rotation change
+     * made elsewhere meanwhile ends the flip without restoring (see [onSystemRotationChanged]). Returns false without
+     * "Modify system settings".
      *
      * A sensor-free variant ("Flip now") existed: [DisplayTurnWatcher] explains how to bring it back.
      */
     fun flip(): Boolean {
         if (!systemSettings.canWrite()) return false
+        if (flip != null) return cancelFlip()
         val toLandscape = !isDisplayLandscape()
         val start = temporaryStart() ?: FlipStart(systemSettings.read(), currentMode())
-        val resuming = flip != null || forcedFrom != null
+        val resuming = forcedFrom != null
         endFlip()
         if (resuming && start.lockedLandscape() == toLandscape) {
             restore(start)
@@ -107,11 +139,22 @@ object OrientationController {
         val locked = mode.toSystemRotation(start.rotation)
         // temporary: Prefs.manualMode is left alone, so nothing stale stays behind if the flip never finishes
         session.applyManual(locked)
-        val active = ActiveFlip(start, locked)
+        val active = ActiveFlip(start, locked, toLandscape, foregroundPackage)
         flip = active
         active.watch(SensorTurnWatcher(appContext, Posture.of(toLandscape)) { onFlipTurned(active, toLandscape) })
         applyOverlay()
         notifyChanged()
+        return true
+    }
+
+    /**
+     * Ends a running flip and puts its start back, unless rotation was changed elsewhere meanwhile (then the flip just
+     * ends). Nothing to do without a flip. Returns false without "Modify system settings".
+     */
+    fun cancelFlip(): Boolean {
+        if (!systemSettings.canWrite()) return false
+        val active = flip ?: return true
+        if (active.written.isStillIn(systemSettings.read())) restore(active.start) else abandonFlip()
         return true
     }
 
@@ -153,6 +196,31 @@ object OrientationController {
     }
 
     /**
+     * "Lock" tile in cycle mode: each tap hard-locks the next [LockStep] (the first tap: landscape), and the tap after
+     * the last puts the settings from before back. Same start rules as [toggleForcedLandscape]. Returns false when it
+     * can't: no "Modify system settings" or no hard lock available.
+     */
+    fun cycleForcedLock(): Boolean {
+        val next = if (forcedFrom != null) forcedStep?.next() else LockStep.entries.first()
+        if (next == null) {
+            val start = forcedFrom!!
+            if (forcedWritten?.isStillIn(systemSettings.read()) == true) restore(start) else abandonFlip()
+            return true
+        }
+        if (!systemSettings.canWrite() || !canForce()) return false
+        val start = temporaryStart() ?: FlipStart(systemSettings.read(), currentMode())
+        endFlip()
+        val locked = SystemRotation(autoRotate = false, userRotation = next.userRotation)
+        session.applyManual(locked)
+        forcedFrom = start
+        forcedWritten = locked
+        forcedStep = next
+        applyOverlay()
+        notifyChanged()
+        return true
+    }
+
+    /**
      * Optional Lock release ([Prefs.lockReleaseOnTurn]): waits for the phone to be held sideways, then for it to be
      * turned upright again, then puts the start back. Waiting for sideways first means tapping Lock while holding
      * the phone upright doesn't end it straight away.
@@ -181,7 +249,7 @@ object OrientationController {
         if (flip !== active) return
         when {
             !active.written.isStillIn(systemSettings.read()) -> abandonFlip()
-            active.start.rotation.autoRotate -> restore(active.start)
+            // even when the start was auto-rotate: the hard lock holds until the phone is turned back
             else -> {
                 val auto = OrientationMode.AUTO.toSystemRotation(systemSettings.read())
                 session.applyManual(auto)
@@ -226,6 +294,7 @@ object OrientationController {
         forcedWatcher = null
         forcedFrom = null
         forcedWritten = null
+        forcedStep = null
     }
 
     /** Whether the screen is showing landscape right now (whoever asked for it). */
@@ -252,7 +321,9 @@ object OrientationController {
 
     private fun applyOverlay(): Boolean {
         val manual = when {
-            forcedFrom != null -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+            forcedFrom != null -> forcedStep?.overlayOrientation ?: ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+            flip != null ->
+                if (flip!!.toLandscape) ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
             // only a manual choice the settings still hold: a stale one must never hard-lock the screen
             Prefs.tileMechanism == TileMechanism.OVERLAY && flip == null ->
                 Prefs.manualMode.takeIf { ManualModeResolver.consistent(it, OrientationMode.fromSystemRotation(systemSettings.read())) }

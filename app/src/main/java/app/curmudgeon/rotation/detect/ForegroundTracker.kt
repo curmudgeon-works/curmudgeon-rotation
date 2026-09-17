@@ -58,11 +58,13 @@ object ForegroundTracker {
         debouncer.reset()
         if (current != null) {
             current = null
+            OrientationController.onForegroundChanged(null)
             OrientationController.applyRule(null)
         }
     }
 
     private fun evaluate(event: WindowEvent) {
+        OrientationController.onForegroundChanged(event.packageName)
         OrientationController.applyRule(RuleMatcher.match(RuleStore.all(), event.packageName, event.activity))
     }
 
@@ -70,6 +72,7 @@ object ForegroundTracker {
         val now = SystemClock.uptimeMillis()
         filter?.takeIf { now - filterBuiltAt < SYSTEM_PACKAGES_TTL_MS }?.let { return it }
         return WindowFilter(
+            ownPackage = context.packageName,
             userIgnoredPackages = Prefs.ignoredPackages,
             inputMethodPackages = SystemPackages.inputMethods(context),
             launcherPackages = SystemPackages.launchers(context),
