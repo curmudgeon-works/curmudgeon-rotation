@@ -54,8 +54,9 @@
             </intent-filter>
             <!-- long-press on a tile opens the app. The system gives tiles no long-press callback: it launches this
                  activity, and any activity start over a fullscreen app throws that app out to picture-in-picture
-                 (YouTube does, 4ms in). So the only honest thing to put here is an action that means to leave that
-                 app. Rotation actions live on tap, which TileService handles in-process. -->
+                 (YouTube does, 4ms in). A Theme.NoDisplay activity changes nothing: the PIP transition is queued
+                 before our onCreate runs (tested 2026-09-22). So the only honest thing to put here is an action that
+                 means to leave that app. Rotation actions live on tap, which TileService handles in-process. -->
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
             </intent-filter>

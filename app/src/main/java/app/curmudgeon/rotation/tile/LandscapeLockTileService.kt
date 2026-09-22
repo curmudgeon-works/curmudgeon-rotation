@@ -10,14 +10,10 @@ import android.graphics.drawable.Icon
 import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
-import app.curmudgeon.rotation.Permissions
 import app.curmudgeon.rotation.R
 import app.curmudgeon.rotation.orientation.OrientationController
 import app.curmudgeon.rotation.service.RotationService
-import app.curmudgeon.rotation.settings.LockTapAction
 import app.curmudgeon.rotation.settings.Prefs
-import app.curmudgeon.rotation.ui.SetupActivity
-import app.curmudgeon.rotation.ui.SetupTopic
 
 /**
  * Second tile ("Lock"), for apps that insist on portrait (HBO Max): tap forces landscape with the hard lock, tap again puts
@@ -39,20 +35,13 @@ class LandscapeLockTileService : TileService() {
     }
 
     override fun onClick() {
-        val done = when (Prefs.lockTapAction) {
-            LockTapAction.LANDSCAPE -> OrientationController.toggleForcedLandscape()
-            LockTapAction.CYCLE -> OrientationController.cycleForcedLock()
-        }
-        if (done) {
-            RotationService.sync(this)
-            updateTile()
+        val open = Prefs.lockTapAction.perform(this)
+        if (open != null) {
+            launch(open)
             return
         }
-        val topic = when {
-            !Permissions.canWriteSettings(this) -> SetupTopic.WRITE_SETTINGS
-            else -> SetupTopic.ACCESSIBILITY
-        }
-        launch(SetupActivity.intent(this, topic))
+        RotationService.sync(this)
+        updateTile()
     }
 
     private fun updateTile() {
