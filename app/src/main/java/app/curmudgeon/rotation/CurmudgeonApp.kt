@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package app.curmudgeon.rotation
 
+import app.curmudgeon.rotation.detect.EventLog
+
 import android.app.Application
 import android.content.SharedPreferences
 import app.curmudgeon.rotation.detect.ForegroundTracker
@@ -33,6 +35,7 @@ class CurmudgeonApp : Application() {
         Prefs.init(this)
         RuleStore.init(Prefs.state)
         RecentActivityLog.init(Prefs.state)
+        EventLog.init(Prefs.state)
         OrientationController.init(this)
         RotationService.createChannel(this)
 

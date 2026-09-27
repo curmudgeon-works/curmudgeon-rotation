@@ -28,7 +28,7 @@ enum class Posture {
 }
 
 /** Reports when the phone has been held in [target] for [stableMs], so a wobble on the way doesn't count. */
-class TurnTracker(private val target: Posture, private val stableMs: Long = 300) {
+class TurnTracker(private val target: Posture, val stableMs: Long = 300) {
     private var since: Long? = null
 
     /** Feeds one sensor sample; true once [target] has held for [stableMs]. */

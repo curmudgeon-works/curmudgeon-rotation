@@ -29,6 +29,7 @@ object PrefKeys {
     const val EXPORT_RULES = "export_rules"
     const val IMPORT_RULES = "import_rules"
     const val RECENT_LOG = "recent_log"
+    const val EVENT_LOG = "event_log"
     const val ABOUT = "about"
 }
 

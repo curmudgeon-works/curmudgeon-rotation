@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package app.curmudgeon.rotation.tile
 
+import app.curmudgeon.rotation.detect.EventLog
+
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.ComponentName
@@ -35,6 +37,7 @@ class LandscapeLockTileService : TileService() {
     }
 
     override fun onClick() {
+        EventLog.log("lock tile: tap")
         val open = Prefs.lockTapAction.perform(this)
         if (open != null) {
             launch(open)

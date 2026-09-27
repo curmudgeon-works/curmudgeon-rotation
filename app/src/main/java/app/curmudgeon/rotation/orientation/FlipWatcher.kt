@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package app.curmudgeon.rotation.orientation
 
+import app.curmudgeon.rotation.detect.EventLog
+
 import android.content.Context
 import android.hardware.SensorManager
 import android.hardware.display.DisplayManager
@@ -15,7 +17,7 @@ import android.view.Surface
  * Listens to the orientation sensor until the phone is held in [target], then calls [onTurned] once on the main
  * thread. Without an orientation sensor it calls [onTurned] straight away.
  */
-class SensorTurnWatcher(context: Context, target: Posture, private val onTurned: () -> Unit) : TurnWatcher {
+class SensorTurnWatcher(context: Context, private val target: Posture, private val onTurned: () -> Unit) : TurnWatcher {
     private val tracker = TurnTracker(target)
     private var done = false
 
@@ -36,6 +38,7 @@ class SensorTurnWatcher(context: Context, target: Posture, private val onTurned:
 
     private fun finish() {
         stop()
+        EventLog.log("sensor: $target held for ${tracker.stableMs} ms")
         onTurned()
     }
 }

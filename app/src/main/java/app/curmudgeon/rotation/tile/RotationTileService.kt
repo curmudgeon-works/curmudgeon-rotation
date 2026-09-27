@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package app.curmudgeon.rotation.tile
 
+import app.curmudgeon.rotation.detect.EventLog
+
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.ComponentName
@@ -68,15 +70,18 @@ class RotationTileService : TileService() {
         pendingTap?.let { tap ->
             handler.removeCallbacks(tap)
             pendingTap = null
+            EventLog.log("tile: double-tap → ${Prefs.lockTapAction}")
             run(Prefs.lockTapAction.perform(this))
             return
         }
         if (!OrientationController.isManualAvailable() || Prefs.tileTapAction == TileAction.OPEN_APP) {
+            EventLog.log("tile: tap → ${Prefs.tileTapAction} (no wait)")
             run(Prefs.tileTapAction.perform(this))
             return
         }
         val tap = Runnable {
             pendingTap = null
+            EventLog.log("tile: tap → ${Prefs.tileTapAction}")
             run(Prefs.tileTapAction.perform(this))
         }
         pendingTap = tap

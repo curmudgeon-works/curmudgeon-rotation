@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package app.curmudgeon.rotation.settings
 
+import app.curmudgeon.rotation.detect.EventLog
+
 import android.Manifest
 import android.net.Uri
 import android.os.Build
@@ -94,6 +96,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         onClick(PrefKeys.EXPORT_RULES) { exportLauncher.launch(EXPORT_FILE_NAME) }
         onClick(PrefKeys.IMPORT_RULES) { importLauncher.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) }
         onClick(PrefKeys.RECENT_LOG) { showRecentLog() }
+        onClick(PrefKeys.EVENT_LOG) { showEventLog() }
         find<Preference>(PrefKeys.ABOUT)?.summary = getString(R.string.pref_about_summary, BuildConfig.VERSION_NAME)
         onClick(PrefKeys.ABOUT) { showAbout() }
 
@@ -205,6 +208,25 @@ class SettingsFragment : PreferenceFragmentCompat() {
             }.toTypedArray<CharSequence>()
             builder.setItems(items, null)
             builder.setNeutralButton(R.string.recent_log_clear) { _, _ -> RecentActivityLog.clear() }
+        }
+        builder.setPositiveButton(android.R.string.ok, null).show()
+    }
+
+    private fun showEventLog() {
+        val context = requireContext()
+        val timeFormat = DateFormat.getTimeFormat(context)
+        val dateFormat = DateFormat.getDateFormat(context)
+        val entries = EventLog.all()
+        val builder = AlertDialog.Builder(context).setTitle(R.string.pref_event_log)
+        if (entries.isEmpty()) {
+            builder.setMessage(R.string.recent_log_empty)
+        } else {
+            val items = entries.map {
+                val date = Date(it.time)
+                "${dateFormat.format(date)} ${timeFormat.format(date)}\n${it.text}"
+            }.toTypedArray<CharSequence>()
+            builder.setItems(items, null)
+            builder.setNeutralButton(R.string.recent_log_clear) { _, _ -> EventLog.clear() }
         }
         builder.setPositiveButton(android.R.string.ok, null).show()
     }

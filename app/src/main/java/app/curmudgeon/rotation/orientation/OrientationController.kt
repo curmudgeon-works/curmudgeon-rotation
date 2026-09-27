@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package app.curmudgeon.rotation.orientation
 
+import app.curmudgeon.rotation.detect.EventLog
+
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -59,7 +61,10 @@ object OrientationController {
      */
     fun onForegroundChanged(packageName: String?) {
         foregroundPackage = packageName
-        if (packageName != null && flip?.leftBehindBy(packageName) == true) cancelFlip()
+        if (packageName != null && flip?.leftBehindBy(packageName) == true) {
+            EventLog.log("flip: left behind by $packageName → cancel")
+            cancelFlip()
+        }
     }
 
     /**
@@ -69,7 +74,10 @@ object OrientationController {
      */
     private fun onSystemRotationChanged() {
         val written = flip?.written ?: forcedWritten
-        if (written != null && !written.isStillIn(systemSettings.read())) abandonFlip() else notifyChanged()
+        if (written != null && !written.isStillIn(systemSettings.read())) {
+            EventLog.log("rotation changed elsewhere (now ${systemSettings.read()}, we had written $written) → abandon")
+            abandonFlip()
+        } else notifyChanged()
     }
 
     /**
@@ -126,17 +134,19 @@ object OrientationController {
      */
     fun flip(): Boolean {
         if (!systemSettings.canWrite()) return false
-        if (flip != null) return cancelFlip()
+        if (flip != null) { EventLog.log("flip: tapped again while running → cancel"); return cancelFlip() }
         val toLandscape = !isDisplayLandscape()
         val start = temporaryStart() ?: FlipStart(systemSettings.read(), currentMode())
         val resuming = forcedFrom != null
         endFlip()
         if (resuming && start.lockedLandscape() == toLandscape) {
+            EventLog.log("flip: during Lock, back toward its start → restore")
             restore(start)
             return true
         }
         val mode = if (toLandscape) OrientationMode.LANDSCAPE else OrientationMode.PORTRAIT
         val locked = mode.toSystemRotation(start.rotation)
+        EventLog.log("flip: start → $mode (writing $locked; start was ${start.rotation} / ${start.mode}; foreground $foregroundPackage)")
         // temporary: Prefs.manualMode is left alone, so nothing stale stays behind if the flip never finishes
         session.applyManual(locked)
         val active = ActiveFlip(start, locked, toLandscape, foregroundPackage)
@@ -154,7 +164,8 @@ object OrientationController {
     fun cancelFlip(): Boolean {
         if (!systemSettings.canWrite()) return false
         val active = flip ?: return true
-        if (active.written.isStillIn(systemSettings.read())) restore(active.start) else abandonFlip()
+        if (active.written.isStillIn(systemSettings.read())) { EventLog.log("flip: cancel → restore start"); restore(active.start) }
+        else { EventLog.log("flip: cancel, but rotation changed elsewhere → abandon"); abandonFlip() }
         return true
     }
 
@@ -179,13 +190,15 @@ object OrientationController {
      */
     fun toggleForcedLandscape(): Boolean {
         forcedFrom?.let { start ->
-            if (forcedWritten?.isStillIn(systemSettings.read()) == true) restore(start) else abandonFlip()
+            if (forcedWritten?.isStillIn(systemSettings.read()) == true) { EventLog.log("lock: off → restore start"); restore(start) }
+            else { EventLog.log("lock: off, rotation changed elsewhere → abandon"); abandonFlip() }
             return true
         }
         if (!systemSettings.canWrite() || !canForce()) return false
         val start = temporaryStart() ?: FlipStart(systemSettings.read(), currentMode())
         endFlip()
         val locked = OrientationMode.LANDSCAPE.toSystemRotation(start.rotation)
+        EventLog.log("lock: on (writing $locked; start was ${start.rotation} / ${start.mode})")
         session.applyManual(locked)
         forcedFrom = start
         forcedWritten = locked
@@ -248,9 +261,10 @@ object OrientationController {
     private fun onFlipTurned(active: ActiveFlip, toLandscape: Boolean) {
         if (flip !== active) return
         when {
-            !active.written.isStillIn(systemSettings.read()) -> abandonFlip()
+            !active.written.isStillIn(systemSettings.read()) -> { EventLog.log("flip: sensor saw the turn, but rotation changed elsewhere → abandon"); abandonFlip() }
             // even when the start was auto-rotate: the hard lock holds until the phone is turned back
             else -> {
+                EventLog.log("flip: sensor saw the phone turned ${if (toLandscape) "to landscape" else "to portrait"} → auto-rotate on, waiting for the turn back")
                 val auto = OrientationMode.AUTO.toSystemRotation(systemSettings.read())
                 session.applyManual(auto)
                 active.written = auto
@@ -263,7 +277,8 @@ object OrientationController {
 
     private fun onFlipTurnedBack(active: ActiveFlip) {
         if (flip !== active) return
-        if (active.written.isStillIn(systemSettings.read())) restore(active.start) else abandonFlip()
+        if (active.written.isStillIn(systemSettings.read())) { EventLog.log("flip: turned back → restore start"); restore(active.start) }
+        else { EventLog.log("flip: turned back, but rotation changed elsewhere → abandon"); abandonFlip() }
     }
 
     private fun ActiveFlip.watch(next: TurnWatcher) {
@@ -273,6 +288,7 @@ object OrientationController {
     }
 
     private fun restore(start: FlipStart) {
+        EventLog.log("restore: ${start.rotation} / ${start.mode}")
         endFlip()
         session.applyManual(start.rotation)
         Prefs.manualMode = start.mode
@@ -302,6 +318,7 @@ object OrientationController {
 
     /** Applies the action matched for the foreground window; null ends any rule-driven rotation. */
     fun applyRule(action: RuleAction?) {
+        EventLog.log("rule: ${action ?: "none"} for $foregroundPackage")
         val target = action?.systemTarget()
         if (target != null && systemSettings.canWrite()) session.applyRuleTarget(target) else session.end(Prefs.restoreOnLeave)
         ruleOverlay = action?.overlayOrientation()

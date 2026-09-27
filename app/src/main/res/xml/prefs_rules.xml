@@ -31,5 +31,10 @@
             app:key="recent_log"
             app:summary="@string/pref_recent_log_summary"
             app:title="@string/pref_recent_log" />
+        <Preference
+            app:iconSpaceReserved="false"
+            app:key="event_log"
+            app:summary="@string/pref_event_log_summary"
+            app:title="@string/pref_event_log" />
     </PreferenceCategory>
 </PreferenceScreen>
