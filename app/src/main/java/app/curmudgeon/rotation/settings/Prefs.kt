@@ -29,6 +29,7 @@ object PrefKeys {
     const val EXPORT_RULES = "export_rules"
     const val IMPORT_RULES = "import_rules"
     const val RECENT_LOG = "recent_log"
+    const val KEEP_EVENT_LOG = "keep_event_log"
     const val EVENT_LOG = "event_log"
     const val ABOUT = "about"
 }
@@ -98,6 +99,9 @@ object Prefs {
     val quickActionsNotification: Boolean get() = settings.getBoolean(PrefKeys.QUICK_ACTIONS_NOTIFICATION, false)
 
     val startOnBoot: Boolean get() = settings.getBoolean(PrefKeys.START_ON_BOOT, false)
+
+    /** Off by default: nothing is written down, not even to logcat. */
+    val keepEventLog: Boolean get() = settings.getBoolean(PrefKeys.KEEP_EVENT_LOG, false)
 
     /** The first-launch prompt for "Modify system settings" has been shown (shown once; the status card covers later). */
     var askedWriteSettings: Boolean

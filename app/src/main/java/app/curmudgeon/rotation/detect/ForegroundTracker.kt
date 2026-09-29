@@ -13,7 +13,9 @@ import app.curmudgeon.rotation.settings.Prefs
 /**
  * Pipeline from detected foreground activities to rules: filter transient windows, debounce,
  * log, match, apply. Both detection sources (accessibility events, usage-stats polling) feed it.
- * Main thread only.
+ * Only while something needs the foreground app ([isWanted]): a per-app rule, or a flip that ends when its app is
+ * left. Otherwise events are dropped and the app in front is forgotten; the accessibility service stops receiving
+ * them altogether ([sync]). Main thread only.
  */
 object ForegroundTracker {
     private const val SYSTEM_PACKAGES_TTL_MS = 30_000L
@@ -29,13 +31,29 @@ object ForegroundTracker {
 
     private val deliver = Runnable {
         debouncer.poll(SystemClock.uptimeMillis())?.let { event ->
+            if (!isWanted()) return@let forget()
             current = event
-            RecentActivityLog.record(event, System.currentTimeMillis())
+            // only apps with a rule: the rule editor offers their screens; other apps are not written down
+            if (RuleStore.find(event.packageName) != null) RecentActivityLog.record(event, System.currentTimeMillis())
             evaluate(event)
         }
     }
 
+    /** A per-app rule exists, or a flip is waiting and must hear when its app is left. */
+    fun isWanted(): Boolean = RuleStore.all().isNotEmpty() || OrientationController.isFlipping
+
+    /**
+     * Rules or a flip changed: subscribes the accessibility service to app changes only while [isWanted], and forgets
+     * the app in front when not (a later flip must not take a stale one for where it began).
+     */
+    fun sync() {
+        val wanted = isWanted()
+        if (!wanted) forget()
+        AccessibilityDetectionService.listen(wanted)
+    }
+
     fun onWindowEvent(context: Context, event: WindowEvent) {
+        if (!isWanted()) return forget()
         if (!filter(context).accepts(event.packageName)) return
         handler.removeCallbacks(deliver)
         val dueAt = debouncer.submit(event, SystemClock.uptimeMillis(), Prefs.debounceMs) ?: return
@@ -60,6 +78,16 @@ object ForegroundTracker {
             current = null
             OrientationController.onForegroundChanged(null)
             OrientationController.applyRule(null)
+        }
+    }
+
+    /** Nothing needs the foreground app: drop it without touching rotation (no rule can be active). */
+    private fun forget() {
+        handler.removeCallbacks(deliver)
+        debouncer.reset()
+        if (current != null) {
+            current = null
+            OrientationController.onForegroundChanged(null)
         }
     }
 

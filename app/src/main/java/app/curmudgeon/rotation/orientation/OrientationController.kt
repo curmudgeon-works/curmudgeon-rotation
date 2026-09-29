@@ -33,6 +33,9 @@ object OrientationController {
     /** The app rules were last evaluated for, or null without foreground detection. */
     private var foregroundPackage: String? = null
     private var forcedFrom: FlipStart? = null
+    /** The rule action last applied, for the event log (a rule starting or ending, never "no rule here"). */
+    private var loggedRule: RuleAction? = null
+    private var loggedRuleFor: String? = null
     private var forcedWritten: SystemRotation? = null
     /** Where a cycling Lock is, or null for the plain landscape Lock (either landscape side). */
     private var forcedStep: LockStep? = null
@@ -258,6 +261,9 @@ object OrientationController {
     /** Whether the orientation sensor is in use (a flip, or a Lock set to release on turn); needs the process kept alive. */
     val isWatchingSensor: Boolean get() = flip != null || forcedWatcher != null
 
+    /** A tile flip is running (it needs to hear of other apps: leaving the app ends one still waiting). */
+    val isFlipping: Boolean get() = flip != null
+
     private fun onFlipTurned(active: ActiveFlip, toLandscape: Boolean) {
         if (flip !== active) return
         when {
@@ -318,7 +324,10 @@ object OrientationController {
 
     /** Applies the action matched for the foreground window; null ends any rule-driven rotation. */
     fun applyRule(action: RuleAction?) {
-        EventLog.log("rule: ${action ?: "none"} for $foregroundPackage")
+        if (action != null && (action != loggedRule || foregroundPackage != loggedRuleFor)) EventLog.log("rule: $action for $foregroundPackage")
+        else if (action == null && loggedRule != null) EventLog.log("rule: $loggedRule for $loggedRuleFor ended")
+        loggedRule = action
+        loggedRuleFor = foregroundPackage
         val target = action?.systemTarget()
         if (target != null && systemSettings.canWrite()) session.applyRuleTarget(target) else session.end(Prefs.restoreOnLeave)
         ruleOverlay = action?.overlayOrientation()

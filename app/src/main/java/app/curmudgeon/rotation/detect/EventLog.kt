@@ -4,6 +4,7 @@ package app.curmudgeon.rotation.detect
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.core.content.edit
+import app.curmudgeon.rotation.settings.Prefs
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -11,9 +12,10 @@ import org.json.JSONObject
 data class LoggedEvent(val time: Long, val text: String)
 
 /**
- * What the app did and why, newest first: tile taps, flips starting and ending, the sensor turning them, rules,
- * rotation changed elsewhere. Every line also goes to logcat under [TAG]. On the device only, in the app's private
- * preferences; shown and cleared from the settings. Main thread only.
+ * What the app did and why, newest first: tile taps, flips and Lock from start to end (the sensor turning them,
+ * rotation changed elsewhere), per-app rules applying and ending. Never the apps opened when no rule acts. Only
+ * while "Keep an event log" is on (off by default); every line also goes to logcat under [TAG]. On the device only,
+ * in the app's private preferences; shown and cleared from the settings. Main thread only.
  */
 object EventLog {
     const val TAG = "CurmudgeonRotation"
@@ -30,6 +32,7 @@ object EventLog {
     fun all(): List<LoggedEvent> = entries
 
     fun log(text: String) {
+        if (!Prefs.keepEventLog) return
         Log.i(TAG, text)
         if (!::prefs.isInitialized) return
         entries = (listOf(LoggedEvent(System.currentTimeMillis(), text)) + entries).take(MAX_ENTRIES)

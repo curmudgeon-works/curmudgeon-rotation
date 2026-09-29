@@ -12,7 +12,8 @@ import app.curmudgeon.rotation.settings.Prefs
 
 /**
  * Opt-in accessibility service. Reads only the package and class name of windows that come to the
- * front (TYPE_WINDOW_STATE_CHANGED); it cannot see window content (canRetrieveWindowContent=false).
+ * front (TYPE_WINDOW_STATE_CHANGED), and only while a rule or a flip needs them ([listen]); it cannot see window
+ * content (canRetrieveWindowContent=false).
  * It also hosts the accessibility overlay window used by the "force" rule actions.
  */
 class AccessibilityDetectionService : AccessibilityService() {
@@ -21,6 +22,8 @@ class AccessibilityDetectionService : AccessibilityService() {
     override fun onServiceConnected() {
         resolver = ActivityResolver(packageManager)
         isConnected = true
+        instance = this
+        ForegroundTracker.sync()
         OverlayHost.attach(this)
         OrientationController.refresh()
         RotationService.sync(this)
@@ -50,12 +53,28 @@ class AccessibilityDetectionService : AccessibilityService() {
     private fun disconnect() {
         if (!isConnected) return
         isConnected = false
+        instance = null
         if (Prefs.detectionMethod == DetectionMethod.ACCESSIBILITY) ForegroundTracker.stop()
         OverlayHost.detach(this)
         OrientationController.refresh()
     }
 
+    private fun subscribe(wanted: Boolean) {
+        val info = serviceInfo ?: return
+        val types = if (wanted) AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED else 0
+        if (info.eventTypes == types) return
+        info.eventTypes = types
+        serviceInfo = info
+    }
+
     companion object {
+        private var instance: AccessibilityDetectionService? = null
+
+        /** Whether the system sends this service app changes at all; off while no rule or flip needs them. */
+        fun listen(wanted: Boolean) {
+            instance?.subscribe(wanted && Prefs.detectionMethod == DetectionMethod.ACCESSIBILITY)
+        }
+
         /** Whether the system has bound the service in this process. */
         @Volatile
         var isConnected = false

@@ -31,6 +31,12 @@
             app:key="recent_log"
             app:summary="@string/pref_recent_log_summary"
             app:title="@string/pref_recent_log" />
+        <SwitchPreferenceCompat
+            app:defaultValue="false"
+            app:iconSpaceReserved="false"
+            app:key="keep_event_log"
+            app:summary="@string/pref_keep_event_log_summary"
+            app:title="@string/pref_keep_event_log" />
         <Preference
             app:iconSpaceReserved="false"
             app:key="event_log"

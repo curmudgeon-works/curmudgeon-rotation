@@ -24,6 +24,7 @@ class CurmudgeonApp : Application() {
             PrefKeys.TILE_MECHANISM, PrefKeys.OVERLAY_TYPE -> OrientationController.refresh()
             PrefKeys.DETECTION_METHOD -> {
                 ForegroundTracker.stop()
+                ForegroundTracker.sync()
                 RotationService.sync(this)
             }
             PrefKeys.QUICK_ACTIONS_NOTIFICATION -> RotationService.sync(this)
@@ -40,8 +41,12 @@ class CurmudgeonApp : Application() {
         RotationService.createChannel(this)
 
         Prefs.settings.registerOnSharedPreferenceChangeListener(settingsListener)
-        RuleStore.addListener { ForegroundTracker.reevaluate() }
+        RuleStore.addListener {
+            ForegroundTracker.reevaluate() // first, so a deleted last rule ends before the app is forgotten
+            ForegroundTracker.sync()
+        }
         OrientationController.addListener {
+            ForegroundTracker.sync() // a flip starting or ending
             RotationTileService.requestUpdate(this)
             LandscapeLockTileService.requestUpdate(this)
             RotationService.sync(this) // a finished flip no longer needs the service

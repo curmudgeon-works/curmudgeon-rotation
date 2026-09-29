@@ -10,8 +10,8 @@ import org.json.JSONObject
 data class RecentActivity(val packageName: String, val activity: String, val lastSeen: Long)
 
 /**
- * Screens recently brought to the front, newest first, one entry per activity. Feeds the rule
- * editor's "only these screens" suggestions and the log in settings. Stays on the device, in the
+ * Screens of apps with a rule recently brought to the front, newest first, one entry per activity. Feeds the rule
+ * editor's "only these screens" suggestions and the log in settings. Other apps are never written down. Stays on the device, in the
  * app's private preferences. Main thread only.
  */
 object RecentActivityLog {
