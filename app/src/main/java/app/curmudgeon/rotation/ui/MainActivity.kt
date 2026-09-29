@@ -3,6 +3,7 @@ package app.curmudgeon.rotation.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
 import androidx.annotation.StringRes
@@ -93,6 +94,7 @@ class MainActivity : AppCompatActivity() {
             R.string.status_tile, ok = Prefs.tileAdded,
             detail = if (Prefs.tileAdded) R.string.status_tile_ok else R.string.status_tile_missing,
             fixLabel = R.string.status_add,
+            open = { startActivity(SettingsActivity.intent(this, "section_tile")) },
         ) {
             if (TileRequester.isSupported) TileRequester.request(this) { render() } else openSetup(SetupTopic.TILE)
         }
@@ -142,6 +144,7 @@ class MainActivity : AppCompatActivity() {
         ok: Boolean,
         @StringRes detail: Int,
         @StringRes fixLabel: Int = R.string.status_fix,
+        open: (() -> Unit)? = null,
         fix: () -> Unit,
     ) {
         val row = ItemStatusRowBinding.inflate(layoutInflater, binding.statusRows, true)
@@ -151,6 +154,10 @@ class MainActivity : AppCompatActivity() {
         row.statusFix.isVisible = !ok
         row.statusFix.setText(fixLabel)
         row.statusFix.setOnClickListener { fix() }
+        if (open != null) {
+            row.root.setBackgroundResource(TypedValue().also { theme.resolveAttribute(android.R.attr.selectableItemBackground, it, true) }.resourceId)
+            row.root.setOnClickListener { open() }
+        }
     }
 
     private fun openSetup(topic: SetupTopic) = startActivity(SetupActivity.intent(this, topic))

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package app.curmudgeon.rotation.settings
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -56,6 +58,8 @@ class SettingsActivity : AppCompatActivity() {
 
         if (savedInstanceState == null) {
             show(R.xml.prefs_root, R.string.settings_home_title, addToBackStack = false)
+            // opened on one section (e.g. the main screen's Quick Settings tile row): on top of home, back returns home
+            SECTIONS[intent.getStringExtra(EXTRA_SECTION)]?.let { show(it.xml, it.title) }
         } else if (savedInstanceState.getBoolean(STATE_SEARCHING)) {
             // the field's text is restored after onCreate, which re-runs the search through the text listener
             binding.title.isVisible = false
@@ -138,6 +142,11 @@ class SettingsActivity : AppCompatActivity() {
 
     companion object {
         private const val STATE_SEARCHING = "searching"
+        private const val EXTRA_SECTION = "section"
+
+        /** Settings opened on the [SECTIONS] screen with key [section]. */
+        fun intent(context: Context, section: String) =
+            Intent(context, SettingsActivity::class.java).putExtra(EXTRA_SECTION, section)
 
         /** Home row key -> section screen. Order and keys must match res/xml/prefs_root.xml. */
         val SECTIONS = linkedMapOf(
