@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
+import app.curmudgeon.rotation.orientation.HomeChoice
 import app.curmudgeon.rotation.orientation.OrientationMode
 import app.curmudgeon.rotation.orientation.SystemRotation
 import app.curmudgeon.rotation.orientation.SystemRotationStateStore
@@ -118,6 +119,21 @@ object Prefs {
         get() = state.getString("manual_mode", null)
             ?.let { name -> OrientationMode.entries.firstOrNull { it.name == name } } ?: OrientationMode.OFF
         set(value) = state.edit { putString("manual_mode", value.name) }
+
+    /** The choice under "Rotate" on the main screen, or null when none is in force (rotation was set elsewhere). */
+    var homeChoice: HomeChoice?
+        get() = HomeChoice.of(state.getString("home_choice", null))
+        set(value) = state.edit { putString("home_choice", value?.value) }
+
+    /** Where the "Lock orientation" arrow points: a Surface rotation, the top of the picture on the phone. */
+    var lockArrow: Int
+        get() = state.getInt("lock_arrow", 0).coerceIn(0, 3)
+        set(value) = state.edit { putInt("lock_arrow", value) }
+
+    /** Per-app rules win over the choice under "Rotate"; off, rules are ignored (and apps aren't watched for them). */
+    var rulesWin: Boolean
+        get() = state.getBoolean("rules_win", true)
+        set(value) = state.edit { putBoolean("rules_win", value) }
 
     val rotationStateStore: SystemRotationStateStore = object : SystemRotationStateStore {
         override var snapshot: SystemRotation?

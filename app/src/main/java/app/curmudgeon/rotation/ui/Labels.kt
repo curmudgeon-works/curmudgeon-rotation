@@ -6,6 +6,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import app.curmudgeon.rotation.R
 import app.curmudgeon.rotation.orientation.FlipPhase
+import app.curmudgeon.rotation.orientation.HomeChoice
 import app.curmudgeon.rotation.orientation.OrientationController
 import app.curmudgeon.rotation.orientation.OrientationMode
 import app.curmudgeon.rotation.rules.RuleAction
@@ -33,6 +34,24 @@ fun OrientationMode.iconRes(): Int = when (this) {
     OrientationMode.PORTRAIT -> R.drawable.ic_rotation_portrait
     OrientationMode.LANDSCAPE -> R.drawable.ic_rotation_landscape
     OrientationMode.REVERSE_LANDSCAPE -> R.drawable.ic_rotation_reverse_landscape
+}
+
+@StringRes
+fun HomeChoice.titleRes(): Int = when (this) {
+    HomeChoice.AUTO -> R.string.rotate_auto
+    HomeChoice.FOUR_WAY -> R.string.rotate_four_way
+    HomeChoice.LOCKED -> R.string.rotate_locked
+    HomeChoice.PORTRAIT_FLIP -> R.string.rotate_portrait_flip
+    HomeChoice.LANDSCAPE_FLIP -> R.string.rotate_landscape_flip
+}
+
+@StringRes
+fun HomeChoice.summaryRes(): Int = when (this) {
+    HomeChoice.AUTO -> R.string.rotate_auto_summary
+    HomeChoice.FOUR_WAY -> R.string.rotate_four_way_summary
+    HomeChoice.LOCKED -> R.string.rotate_locked_summary
+    HomeChoice.PORTRAIT_FLIP -> R.string.rotate_portrait_flip_summary
+    HomeChoice.LANDSCAPE_FLIP -> R.string.rotate_landscape_flip_summary
 }
 
 @StringRes

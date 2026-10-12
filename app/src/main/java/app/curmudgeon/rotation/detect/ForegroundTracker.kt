@@ -39,8 +39,8 @@ object ForegroundTracker {
         }
     }
 
-    /** A per-app rule exists, or a flip is waiting and must hear when its app is left. */
-    fun isWanted(): Boolean = RuleStore.all().isNotEmpty() || OrientationController.isFlipping
+    /** A per-app rule exists (and rules win), or a flip is waiting and must hear when its app is left. */
+    fun isWanted(): Boolean = (Prefs.rulesWin && RuleStore.all().isNotEmpty()) || OrientationController.isFlipping
 
     /**
      * Rules or a flip changed: subscribes the accessibility service to app changes only while [isWanted], and forgets
@@ -58,6 +58,12 @@ object ForegroundTracker {
         handler.removeCallbacks(deliver)
         val dueAt = debouncer.submit(event, SystemClock.uptimeMillis(), Prefs.debounceMs) ?: return
         handler.postAtTime(deliver, dueAt)
+    }
+
+    /** "Per-app rules win" changed: off ends any rule in force now, on applies the current app's rule. */
+    fun onRulesWinChanged() {
+        if (!Prefs.rulesWin && current != null) OrientationController.applyRule(null) else reevaluate()
+        sync()
     }
 
     /** Re-applies rules to the current app, e.g. after a rule was edited. */
@@ -93,7 +99,9 @@ object ForegroundTracker {
 
     private fun evaluate(event: WindowEvent) {
         OrientationController.onForegroundChanged(event.packageName)
-        OrientationController.applyRule(RuleMatcher.match(RuleStore.all(), event.packageName, event.activity))
+        OrientationController.applyRule(
+            if (Prefs.rulesWin) RuleMatcher.match(RuleStore.all(), event.packageName, event.activity) else null,
+        )
     }
 
     private fun filter(context: Context): WindowFilter {

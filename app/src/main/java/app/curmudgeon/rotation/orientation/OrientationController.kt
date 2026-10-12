@@ -29,6 +29,8 @@ object OrientationController {
     private lateinit var systemSettings: SystemRotationSettings
     private lateinit var session: SystemRotationSession
     private var ruleOverlay: Int? = null
+    /** A per-app rule is in force: it wins over the choice under "Rotate" (see [setHome]). */
+    private var ruleActive = false
     private var flip: ActiveFlip? = null
     /** The app rules were last evaluated for, or null without foreground detection. */
     private var foregroundPackage: String? = null
@@ -83,6 +85,52 @@ object OrientationController {
             EventLog.log("rotation changed elsewhere (now ${systemSettings.read()}, we had written $written) → abandon")
             abandonFlip()
         } else notifyChanged()
+        // the same for the choice under "Rotate", once no tile or rule holds its own settings
+        val home = Prefs.homeChoice
+        if (home != null && flip == null && forcedFrom == null && !session.isActive && !homeHolds(home)) {
+            EventLog.log("rotation changed elsewhere (now ${systemSettings.read()}) → Rotate choice $home dropped")
+            Prefs.homeChoice = null
+            applyOverlay()
+            notifyChanged()
+        }
+    }
+
+    private fun homeHolds(home: HomeChoice): Boolean =
+        systemSettings.read().let { home.system(it, Prefs.lockArrow).isStillIn(it) }
+
+    /**
+     * The choice under "Rotate" shown as selected: none while a tile holds rotation; Auto-rotate when the system has
+     * auto-rotate on and nothing else is chosen.
+     */
+    fun selectedHome(): HomeChoice? = when {
+        flip != null || forcedFrom != null -> null
+        else -> Prefs.homeChoice?.takeIf { homeHolds(it) }
+            ?: HomeChoice.AUTO.takeIf { systemSettings.read().autoRotate }
+    }
+
+    /**
+     * Picks [choice] under "Rotate": it overrides whatever holds rotation now, tiles included (a running flip or Lock
+     * ends without restoring), and becomes what the tiles return to. Returns false when it can't: no "Modify system
+     * settings", or no hard lock for a choice that needs one.
+     */
+    fun setHome(choice: HomeChoice): Boolean {
+        if (!systemSettings.canWrite() || (choice.needsHardLock && !canForce())) return false
+        endFlip()
+        val target = choice.system(systemSettings.read(), Prefs.lockArrow)
+        EventLog.log("rotate: $choice (writing $target)")
+        session.applyManual(target)
+        Prefs.homeChoice = choice
+        Prefs.manualMode = OrientationMode.fromSystemRotation(target)
+        applyOverlay()
+        notifyChanged()
+        return true
+    }
+
+    /** Turns the "Lock orientation" arrow a quarter clockwise; when that choice is in force, freezes the new direction. */
+    fun turnArrow() {
+        val locked = selectedHome() == HomeChoice.LOCKED
+        Prefs.lockArrow = HomeChoice.nextArrow(Prefs.lockArrow)
+        if (locked) setHome(HomeChoice.LOCKED) else notifyChanged()
     }
 
     /**
@@ -111,6 +159,7 @@ object OrientationController {
         endFlip()
         session.applyManual(mode.toSystemRotation(systemSettings.read()))
         Prefs.manualMode = mode
+        Prefs.homeChoice = null
         applyOverlay()
         notifyChanged()
         return true
@@ -351,6 +400,9 @@ object OrientationController {
         forcedPortrait = false
     }
 
+    /** The system rotation settings as they are now. */
+    fun systemRotation(): SystemRotation = systemSettings.read()
+
     /** Whether the screen is showing landscape right now (whoever asked for it). */
     fun isDisplayLandscape(): Boolean = systemSettings.displayRotation().let { it == Surface.ROTATION_90 || it == Surface.ROTATION_270 }
 
@@ -359,6 +411,7 @@ object OrientationController {
         if (action != null && (action != loggedRule || foregroundPackage != loggedRuleFor)) EventLog.log("rule: $action for $foregroundPackage")
         else if (action == null && loggedRule != null) EventLog.log("rule: $loggedRule for $loggedRuleFor ended")
         loggedRule = action
+        ruleActive = action != null
         loggedRuleFor = foregroundPackage
         val target = action?.systemTarget()
         if (target != null && systemSettings.canWrite()) session.applyRuleTarget(target) else session.end(Prefs.restoreOnLeave)
@@ -383,6 +436,9 @@ object OrientationController {
             forcedFrom != null -> forcedStep?.overlayOrientation ?: ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
             flip != null ->
                 if (flip!!.toLandscape) ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
+            // per-app rules win over the Rotate choice
+            Prefs.homeChoice != null && ruleActive -> null
+            Prefs.homeChoice?.takeIf { homeHolds(it) } != null -> Prefs.homeChoice!!.overlay(Prefs.lockArrow)
             // only a manual choice the settings still hold: a stale one must never hard-lock the screen
             Prefs.tileMechanism == TileMechanism.OVERLAY && flip == null ->
                 Prefs.manualMode.takeIf { ManualModeResolver.consistent(it, OrientationMode.fromSystemRotation(systemSettings.read())) }

@@ -29,8 +29,6 @@
     <string name="tile_force_portrait_label">Portrait</string>
     <string name="tile_needs_setup">Tap to set up</string>
     <!-- shown when Portrait/Landscape can only use the system setting, which apps may override -->
-    <string name="main_current_mode_short">Current rotation: %1$s</string>
-    <string name="main_hard_lock">%1$s (hard lock)</string>
     <string name="tile_soft_lock">%1$s (apps can override)</string>
     <!-- a flip is waiting for the phone to be turned; %1$s is the locked mode -->
     <string name="tile_flip_waiting">%1$s until you turn the phone</string>
@@ -63,10 +61,37 @@
 
     <!-- main screen -->
     <string name="main_status">Status</string>
+    <!-- "Rotate" section on the main screen: the user's own rotation, which the tiles return to -->
+    <string name="main_rotate">Rotate</string>
+    <string name="rotate_auto">Auto-rotate</string>
+    <string name="rotate_auto_summary">Android\'s own auto-rotate. Apps can still refuse to turn.</string>
+    <string name="rotate_four_way">4-way auto-rotate</string>
+    <string name="rotate_four_way_summary">Follows the phone to all four sides, upside down too. Apps can\'t refuse.</string>
+    <string name="rotate_locked">Lock orientation</string>
+    <!-- %1$s is a direction from rotate_direction_* -->
+    <string name="rotate_locked_summary">Frozen with the top of the picture at the %1$s. Tap the arrow to turn it. Apps can\'t override.</string>
+    <string name="rotate_portrait_flip">Portrait, flippable</string>
+    <string name="rotate_portrait_flip_summary">Always portrait. Turning the phone over switches between the two portrait sides. Apps can\'t override.</string>
+    <string name="rotate_landscape_flip">Landscape, flippable</string>
+    <string name="rotate_landscape_flip_summary">Always landscape. Turning the phone switches between the two landscape sides. Apps can\'t override.</string>
+    <string name="rotate_needs_hard_lock">Needs the accessibility service: tap to set it up.</string>
+    <string name="rotate_turn_arrow">Turn the arrow (now: top at the %1$s)</string>
+    <string name="rotate_direction_top">top</string>
+    <string name="rotate_direction_right">right</string>
+    <string name="rotate_direction_bottom">bottom</string>
+    <string name="rotate_direction_left">left</string>
+    <string name="rotate_rules_win">Per-app rules win</string>
+    <string name="rotate_rules_win_summary">Apps with a rule below get their own rotation. Off: rules are ignored and the choice above applies everywhere.</string>
+    <!-- the line above the choices: what holds rotation right now -->
+    <string name="rotate_now">Now: %1$s</string>
+    <string name="rotate_now_tile">%1$s tile, %2$s. Tap the tile again to go back, or pick below.</string>
+    <string name="rotate_now_lock">hard lock</string>
+    <string name="rotate_now_portrait">hard portrait lock</string>
+    <string name="rotate_now_locked">Lock orientation, top of the picture at the %1$s</string>
+    <string name="rotate_now_system">Android\'s rotation lock, top of the picture at the %1$s (apps can override)</string>
     <string name="main_rules">Rules</string>
     <string name="main_add_rule">Add rule</string>
     <string name="main_rules_empty">No rules yet. The Quick Settings tile works without rules; add one to rotate automatically for a specific app.</string>
-    <string name="main_current_mode">Current rotation: %1$s (%2$s)</string>
     <string name="status_fix">Fix</string>
     <string name="status_add">Add</string>
     <string name="status_tile">Quick Settings tile</string>

@@ -4,6 +4,7 @@ package app.curmudgeon.rotation.ui
 import android.content.Intent
 import android.os.Bundle
 import android.util.TypedValue
+import android.view.Surface
 import android.view.Menu
 import android.view.MenuItem
 import androidx.annotation.StringRes
@@ -13,8 +14,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import app.curmudgeon.rotation.Permissions
 import app.curmudgeon.rotation.R
 import app.curmudgeon.rotation.databinding.ActivityMainBinding
+import app.curmudgeon.rotation.databinding.ItemRotateOptionBinding
 import app.curmudgeon.rotation.databinding.ItemStatusRowBinding
 import app.curmudgeon.rotation.detect.AccessibilityDetectionService
+import app.curmudgeon.rotation.detect.ForegroundTracker
+import app.curmudgeon.rotation.orientation.HomeChoice
 import app.curmudgeon.rotation.orientation.OrientationController
 import app.curmudgeon.rotation.orientation.OrientationMode
 import app.curmudgeon.rotation.rules.RuleStore
@@ -39,6 +43,11 @@ class MainActivity : AppCompatActivity() {
         binding.rulesList.layoutManager = LinearLayoutManager(this)
         binding.rulesList.adapter = rulesAdapter
         binding.addRuleButton.setOnClickListener { startActivity(Intent(this, AppPickerActivity::class.java)) }
+        binding.rulesWinRow.setOnClickListener {
+            Prefs.rulesWin = !Prefs.rulesWin
+            ForegroundTracker.onRulesWinChanged()
+            render()
+        }
     }
 
     override fun onResume() {
@@ -74,18 +83,72 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun render() {
+        renderRotate()
         renderStatus()
-        val current = OrientationController.currentMode()
-        val mode = getString(current.labelRes())
-        binding.currentMode.text = getString(R.string.main_current_mode_short, flipLabel(current) ?: when {
-            !current.isLandscapeLock() -> mode
-            OrientationController.isHardLockAvailable() -> getString(R.string.main_hard_lock, mode)
-            else -> getString(R.string.tile_soft_lock, mode)
-        })
         val rules = RuleStore.all()
         rulesAdapter.submitList(rules)
         binding.rulesEmpty.isVisible = rules.isEmpty()
     }
+
+    /** The "Rotate" section: what holds rotation now, the five choices, and whether per-app rules win. */
+    private fun renderRotate() {
+        val selected = OrientationController.selectedHome()
+        binding.currentMode.text = getString(R.string.rotate_now, currentText(selected))
+        binding.rotateOptions.removeAllViews()
+        for (choice in HomeChoice.entries) {
+            val row = ItemRotateOptionBinding.inflate(layoutInflater, binding.rotateOptions, true)
+            val usable = !choice.needsHardLock || OrientationController.canForce()
+            row.optionRadio.isChecked = choice == selected
+            row.optionTitle.setText(choice.titleRes())
+            row.optionSummary.text = when {
+                !usable -> getString(R.string.rotate_needs_hard_lock)
+                choice == HomeChoice.LOCKED -> getString(R.string.rotate_locked_summary, direction(Prefs.lockArrow))
+                else -> getString(choice.summaryRes())
+            }
+            row.root.alpha = if (usable) 1f else 0.5f
+            row.root.setOnClickListener { pick(choice) }
+            if (choice == HomeChoice.LOCKED) {
+                row.optionArrow.isVisible = true
+                // drawn as the phone is held right now; the arrow points where the top of the picture will sit on it
+                val held = display?.rotation ?: Surface.ROTATION_0
+                row.optionArrowPhone.rotation = -90f * held
+                row.optionArrowPointer.rotation = 90f * (Prefs.lockArrow - held)
+                row.optionArrow.contentDescription = getString(R.string.rotate_turn_arrow, direction(Prefs.lockArrow))
+                row.optionArrow.setOnClickListener { OrientationController.turnArrow() }
+            }
+        }
+        binding.rulesWin.isChecked = Prefs.rulesWin
+    }
+
+    private fun pick(choice: HomeChoice) {
+        if (OrientationController.setHome(choice)) return
+        openSetup(if (!Permissions.canWriteSettings(this)) SetupTopic.WRITE_SETTINGS else SetupTopic.ACCESSIBILITY)
+    }
+
+    private fun currentText(selected: HomeChoice?): String {
+        val mode = OrientationController.currentMode()
+        flipLabel(mode)?.let { return getString(R.string.rotate_now_tile, getString(R.string.tile_label), it) }
+        if (OrientationController.isLandscapeForced) {
+            return getString(R.string.rotate_now_tile, getString(R.string.tile_force_landscape_label), getString(R.string.rotate_now_lock))
+        }
+        if (OrientationController.isPortraitForced) {
+            return getString(R.string.rotate_now_tile, getString(R.string.tile_force_portrait_label), getString(R.string.rotate_now_portrait))
+        }
+        return when (selected) {
+            null -> getString(R.string.rotate_now_system, direction(OrientationController.systemRotation().userRotation))
+            HomeChoice.LOCKED -> getString(R.string.rotate_now_locked, direction(Prefs.lockArrow))
+            else -> getString(selected.titleRes())
+        }
+    }
+
+    private fun direction(rotation: Int): String = getString(
+        when (rotation) {
+            Surface.ROTATION_90 -> R.string.rotate_direction_right
+            Surface.ROTATION_180 -> R.string.rotate_direction_bottom
+            Surface.ROTATION_270 -> R.string.rotate_direction_left
+            else -> R.string.rotate_direction_top
+        },
+    )
 
     private fun renderStatus() {
         binding.statusRows.removeAllViews()
