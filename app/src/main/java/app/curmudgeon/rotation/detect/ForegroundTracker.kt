@@ -13,9 +13,9 @@ import app.curmudgeon.rotation.settings.Prefs
 /**
  * Pipeline from detected foreground activities to rules: filter transient windows, debounce,
  * log, match, apply. Both detection sources (accessibility events, usage-stats polling) feed it.
- * Only while something needs the foreground app ([isWanted]): a per-app rule, or a flip that ends when its app is
- * left. Otherwise events are dropped and the app in front is forgotten; the accessibility service stops receiving
- * them altogether ([sync]). Main thread only.
+ * Only while something needs the foreground app ([isWanted]): a per-app rule, a flip that ends when its app is
+ * left, or a tile or Rotate choice set to be lifted on the launcher. Otherwise events are dropped and the app in front
+ * is forgotten; the accessibility service stops receiving them altogether ([sync]). Main thread only.
  */
 object ForegroundTracker {
     private const val SYSTEM_PACKAGES_TTL_MS = 30_000L
@@ -23,6 +23,7 @@ object ForegroundTracker {
     private val handler = Handler(Looper.getMainLooper())
     private val debouncer = Debouncer<WindowEvent>()
     private var filter: WindowFilter? = null
+    private var launchers: Set<String> = emptySet()
     private var filterBuiltAt = 0L
 
     /** The foreground activity rules were last evaluated for, or null when detection is stopped. */
@@ -39,8 +40,12 @@ object ForegroundTracker {
         }
     }
 
-    /** A per-app rule exists (and rules win), or a flip is waiting and must hear when its app is left. */
-    fun isWanted(): Boolean = (Prefs.rulesWin && RuleStore.all().isNotEmpty()) || OrientationController.isFlipping
+    /**
+     * A per-app rule exists (and rules win), a flip is waiting and must hear when its app is left, or a tile or the
+     * Rotate choice must be lifted while the launcher is in front.
+     */
+    fun isWanted(): Boolean =
+        (Prefs.rulesWin && RuleStore.all().isNotEmpty()) || OrientationController.isFlipping || OrientationController.watchesLauncher
 
     /**
      * Rules or a flip changed: subscribes the accessibility service to app changes only while [isWanted], and forgets
@@ -82,7 +87,7 @@ object ForegroundTracker {
         debouncer.reset()
         if (current != null) {
             current = null
-            OrientationController.onForegroundChanged(null)
+            OrientationController.onForegroundChanged(null, false)
             OrientationController.applyRule(null)
         }
     }
@@ -93,12 +98,18 @@ object ForegroundTracker {
         debouncer.reset()
         if (current != null) {
             current = null
-            OrientationController.onForegroundChanged(null)
+            OrientationController.onForegroundChanged(null, false)
         }
     }
 
+    /**
+     * The launcher replaces the app like any other screen and ends its rule, unless "Ignore launcher" (per-app rules)
+     * keeps the rule in force there.
+     */
     private fun evaluate(event: WindowEvent) {
-        OrientationController.onForegroundChanged(event.packageName)
+        val launcher = event.packageName in launchers
+        OrientationController.onForegroundChanged(event.packageName, launcher)
+        if (launcher && Prefs.ignoreLauncher && RuleStore.find(event.packageName) == null) return
         OrientationController.applyRule(
             if (Prefs.rulesWin) RuleMatcher.match(RuleStore.all(), event.packageName, event.activity) else null,
         )
@@ -107,13 +118,8 @@ object ForegroundTracker {
     private fun filter(context: Context): WindowFilter {
         val now = SystemClock.uptimeMillis()
         filter?.takeIf { now - filterBuiltAt < SYSTEM_PACKAGES_TTL_MS }?.let { return it }
-        return WindowFilter(
-            ownPackage = context.packageName,
-            userIgnoredPackages = Prefs.ignoredPackages,
-            inputMethodPackages = SystemPackages.inputMethods(context),
-            launcherPackages = SystemPackages.launchers(context),
-            ignoreLauncher = Prefs.ignoreLauncher,
-        ).also {
+        launchers = SystemPackages.launchers(context)
+        return WindowFilter(Prefs.ignoredPackages).also {
             filter = it
             filterBuiltAt = now
         }

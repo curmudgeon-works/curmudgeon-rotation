@@ -18,11 +18,25 @@
             app:useSimpleSummaryProvider="true" />
 
         <SwitchPreferenceCompat
-            app:defaultValue="true"
+            app:defaultValue="false"
             app:iconSpaceReserved="false"
             app:key="ignore_launcher"
             app:summary="@string/pref_ignore_launcher_summary"
             app:title="@string/pref_ignore_launcher" />
+
+        <SwitchPreferenceCompat
+            app:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:key="ignore_launcher_tiles"
+            app:summary="@string/pref_ignore_launcher_tiles_summary"
+            app:title="@string/pref_ignore_launcher_tiles" />
+
+        <SwitchPreferenceCompat
+            app:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:key="ignore_launcher_rotate"
+            app:summary="@string/pref_ignore_launcher_rotate_summary"
+            app:title="@string/pref_ignore_launcher_rotate" />
 
         <EditTextPreference
             app:defaultValue=""

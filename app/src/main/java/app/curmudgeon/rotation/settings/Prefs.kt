@@ -22,6 +22,8 @@ object PrefKeys {
     const val TILE_MECHANISM = "tile_mechanism"
     const val OVERLAY_TYPE = "overlay_type"
     const val IGNORE_LAUNCHER = "ignore_launcher"
+    const val IGNORE_LAUNCHER_TILES = "ignore_launcher_tiles"
+    const val IGNORE_LAUNCHER_ROTATE = "ignore_launcher_rotate"
     const val IGNORED_PACKAGES = "ignored_packages"
     const val DEBOUNCE_MS = "debounce_ms"
     const val POLL_INTERVAL_MS = "poll_interval_ms"
@@ -88,7 +90,14 @@ object Prefs {
     val overlayType: OverlayType
         get() = enumPref(PrefKeys.OVERLAY_TYPE, OverlayType.ACCESSIBILITY) { it.value }
 
-    val ignoreLauncher: Boolean get() = settings.getBoolean(PrefKeys.IGNORE_LAUNCHER, true)
+    /** Per-app rules: on, going to the launcher keeps the app's rule in force there; off, it ends the rule. */
+    val ignoreLauncher: Boolean get() = settings.getBoolean(PrefKeys.IGNORE_LAUNCHER, false)
+
+    /** Tiles: on, Lock, Portrait and Flip stay in force on the launcher; off, they're lifted there and a waiting flip ends. */
+    val ignoreLauncherTiles: Boolean get() = settings.getBoolean(PrefKeys.IGNORE_LAUNCHER_TILES, true)
+
+    /** Rotate choices: on, the choice is forced on the launcher too; off, it's lifted while the launcher is in front. */
+    val ignoreLauncherRotate: Boolean get() = settings.getBoolean(PrefKeys.IGNORE_LAUNCHER_ROTATE, true)
 
     val ignoredPackages: Set<String>
         get() = parsePackageList(settings.getString(PrefKeys.IGNORED_PACKAGES, "").orEmpty())

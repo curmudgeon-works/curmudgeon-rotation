@@ -34,6 +34,8 @@ object OrientationController {
     private var flip: ActiveFlip? = null
     /** The app rules were last evaluated for, or null without foreground detection. */
     private var foregroundPackage: String? = null
+    /** The launcher (home screen, app drawer, recents) is in front, as far as foreground detection knows. */
+    private var launcherInFront = false
     private var forcedFrom: FlipStart? = null
     /** The rule action last applied, for the event log (a rule starting or ending, never "no rule here"). */
     private var loggedRule: RuleAction? = null
@@ -75,14 +77,26 @@ object OrientationController {
     /**
      * The foreground app changed, or detection stopped (null). Call before applying the new app's rule, so a flip
      * left behind (see [ActiveFlip.leftBehindBy]) ends at its start first and the rule snapshots the real settings.
+     * [launcher]: the launcher is in front, which leaves a flip behind only with "Ignore launcher" (tiles) off, and
+     * lifts the tiles' and the Rotate choice's hard lock while their "Ignore launcher" is off.
      */
-    fun onForegroundChanged(packageName: String?) {
+    fun onForegroundChanged(packageName: String?, launcher: Boolean) {
         foregroundPackage = packageName
-        if (packageName != null && flip?.leftBehindBy(packageName) == true) {
+        val launcherChanged = launcher != launcherInFront
+        launcherInFront = launcher
+        if (launcherChanged && watchesLauncher) EventLog.log(if (launcher) "launcher in front: $packageName → lift" else "launcher left → hard lock back")
+        val ignored = launcher && Prefs.ignoreLauncherTiles
+        if (packageName != null && !ignored && flip?.leftBehindBy(packageName) == true) {
             EventLog.log("flip: left behind by $packageName → cancel")
             cancelFlip()
         }
+        if (launcherChanged) applyOverlay()
     }
+
+    /** A tile or the Rotate choice is in force with its "Ignore launcher" off: it must hear when the launcher comes in front. */
+    val watchesLauncher: Boolean
+        get() = (!Prefs.ignoreLauncherTiles && (forcedFrom != null || flip != null)) ||
+            (!Prefs.ignoreLauncherRotate && Prefs.homeChoice != null)
 
     /**
      * Rotation changed, possibly outside this app (system Auto-rotate tile, rotate button, a rule). If it no longer
@@ -444,16 +458,20 @@ object OrientationController {
         // the Rotate choice in force: no tile or rule holds rotation, and the settings still hold what it wrote
         val home = Prefs.homeChoice?.takeIf { forcedFrom == null && flip == null && !ruleActive && homeHolds(it) }
         followPortraitSide(home == HomeChoice.PORTRAIT_FLIP)
+        // "Ignore launcher" off: the hard lock is lifted while the launcher is in front, back when an app is
+        val liftTiles = launcherInFront && !Prefs.ignoreLauncherTiles
+        val liftRotate = launcherInFront && !Prefs.ignoreLauncherRotate
         val manual = when {
+            liftTiles && (forcedFrom != null || flip != null) -> null
             forcedPortrait -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             forcedFrom != null -> forcedStep?.overlayOrientation ?: ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
             flip != null ->
                 if (flip!!.toLandscape) ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
             // per-app rules win over the Rotate choice
             Prefs.homeChoice != null && ruleActive -> null
-            home != null -> home.overlay(Prefs.lockArrow, portraitUpsideDown)
+            home != null -> if (liftRotate) null else home.overlay(Prefs.lockArrow, portraitUpsideDown)
             // only a manual choice the settings still hold: a stale one must never hard-lock the screen
-            Prefs.tileMechanism == TileMechanism.OVERLAY && flip == null ->
+            Prefs.tileMechanism == TileMechanism.OVERLAY && flip == null && !liftTiles ->
                 Prefs.manualMode.takeIf { ManualModeResolver.consistent(it, OrientationMode.fromSystemRotation(systemSettings.read())) }
                     ?.toOverlayOrientation()
             else -> null

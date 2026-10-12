@@ -21,7 +21,10 @@ class CurmudgeonApp : Application() {
     // held in a field: SharedPreferences keeps only weak references to listeners
     private val settingsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         when (key) {
-            PrefKeys.IGNORE_LAUNCHER, PrefKeys.IGNORED_PACKAGES -> ForegroundTracker.invalidateFilter()
+            PrefKeys.IGNORED_PACKAGES -> ForegroundTracker.invalidateFilter()
+            PrefKeys.IGNORE_LAUNCHER -> ForegroundTracker.reevaluate()
+            // refresh notifies the listener below, which syncs whether app changes are watched
+            PrefKeys.IGNORE_LAUNCHER_TILES, PrefKeys.IGNORE_LAUNCHER_ROTATE -> OrientationController.refresh()
             PrefKeys.TILE_MECHANISM, PrefKeys.OVERLAY_TYPE -> OrientationController.refresh()
             PrefKeys.DETECTION_METHOD -> {
                 ForegroundTracker.stop()
@@ -47,7 +50,7 @@ class CurmudgeonApp : Application() {
             ForegroundTracker.sync()
         }
         OrientationController.addListener {
-            ForegroundTracker.sync() // a flip starting or ending
+            ForegroundTracker.sync() // a flip starting or ending, a tile or Rotate choice that watches the launcher
             RotationTileService.requestUpdate(this)
             LandscapeLockTileService.requestUpdate(this)
             PortraitLockTileService.requestUpdate(this)

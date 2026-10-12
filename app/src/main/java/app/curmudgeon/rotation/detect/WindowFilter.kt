@@ -2,29 +2,17 @@
 package app.curmudgeon.rotation.detect
 
 /**
- * Decides which foreground changes may switch rules. Transient windows (keyboard, system UI and
- * notification shade, system dialogs, our own screens, optionally the launcher) are skipped, so the
- * rule of the app underneath stays in effect instead of flickering off and on.
+ * Decides which foreground changes count as leaving the app in front. Only windows that sit on top of an app without
+ * replacing it are skipped (system UI: notification shade, volume and power menus; framework dialogs and the share
+ * sheet), plus packages the user listed, so the rule of the app underneath stays in effect instead of flickering off
+ * and on. The keyboard window is not an activity, so it never gets here ([ActivityResolver]).
  *
- * Our own package is skipped because every screen of ours is a detour from the app the rules are
- * about: opening settings, or the screen a tile long-press opens.
- *
- * The launcher is ignored by default because recents and app switching pass through it; launchers
- * usually lock their own orientation anyway.
+ * Every full screen counts, ours, a keyboard app's settings and the launcher included: leaving an app is leaving it.
+ * Whether the launcher ends a rule or a tile is decided later, per "Ignore launcher" setting ([ForegroundTracker]).
  */
-class WindowFilter(
-    private val ownPackage: String,
-    private val userIgnoredPackages: Set<String>,
-    private val inputMethodPackages: Set<String>,
-    private val launcherPackages: Set<String>,
-    private val ignoreLauncher: Boolean,
-) {
+class WindowFilter(private val userIgnoredPackages: Set<String>) {
     fun accepts(packageName: String): Boolean =
-        packageName != ownPackage &&
-            packageName !in ALWAYS_IGNORED &&
-            packageName !in userIgnoredPackages &&
-            packageName !in inputMethodPackages &&
-            !(ignoreLauncher && packageName in launcherPackages)
+        packageName !in ALWAYS_IGNORED && packageName !in userIgnoredPackages
 
     companion object {
         /** System UI (shade, volume, power menu) and the framework ("android": share sheet, resolver). */
