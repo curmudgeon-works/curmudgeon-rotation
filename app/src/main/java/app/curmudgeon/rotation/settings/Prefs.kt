@@ -135,6 +135,11 @@ object Prefs {
         get() = state.getBoolean("rules_win", true)
         set(value) = state.edit { putBoolean("rules_win", value) }
 
+    /** The "Per-app rules" list on the main screen is unfolded. */
+    var rulesUnfolded: Boolean
+        get() = state.getBoolean("rules_unfolded", false)
+        set(value) = state.edit { putBoolean("rules_unfolded", value) }
+
     val rotationStateStore: SystemRotationStateStore = object : SystemRotationStateStore {
         override var snapshot: SystemRotation?
             get() = readRotation("snapshot")

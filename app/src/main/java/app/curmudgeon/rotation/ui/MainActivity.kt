@@ -42,10 +42,14 @@ class MainActivity : AppCompatActivity() {
 
         binding.rulesList.layoutManager = LinearLayoutManager(this)
         binding.rulesList.adapter = rulesAdapter
-        binding.addRuleButton.setOnClickListener { startActivity(Intent(this, AppPickerActivity::class.java)) }
-        binding.rulesWinRow.setOnClickListener {
-            Prefs.rulesWin = !Prefs.rulesWin
+        binding.addRuleRow.setOnClickListener { startActivity(Intent(this, AppPickerActivity::class.java)) }
+        binding.rulesWin.setOnClickListener {
+            Prefs.rulesWin = binding.rulesWin.isChecked
             ForegroundTracker.onRulesWinChanged()
+            render()
+        }
+        binding.rulesRow.setOnClickListener {
+            Prefs.rulesUnfolded = !Prefs.rulesUnfolded
             render()
         }
     }
@@ -87,7 +91,10 @@ class MainActivity : AppCompatActivity() {
         renderStatus()
         val rules = RuleStore.all()
         rulesAdapter.submitList(rules)
-        binding.rulesEmpty.isVisible = rules.isEmpty()
+        val count = resources.getQuantityString(R.plurals.rotate_rules_count, rules.size, rules.size)
+        binding.rulesSummary.text = getString(if (Prefs.rulesWin) R.string.rotate_rules_on else R.string.rotate_rules_off, count)
+        binding.rulesBody.isVisible = Prefs.rulesUnfolded
+        binding.rulesFold.rotation = if (Prefs.rulesUnfolded) 270f else 90f
     }
 
     /** The "Rotate" section: what holds rotation now, the five choices, and whether per-app rules win. */
