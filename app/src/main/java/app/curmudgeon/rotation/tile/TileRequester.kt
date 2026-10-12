@@ -2,10 +2,12 @@
 package app.curmudgeon.rotation.tile
 
 import android.app.StatusBarManager
+import android.content.ComponentName
 import android.content.Context
 import android.graphics.drawable.Icon
 import android.os.Build
 import androidx.annotation.ChecksSdkIntAtLeast
+import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
 import app.curmudgeon.rotation.R
 import app.curmudgeon.rotation.settings.Prefs
@@ -16,17 +18,23 @@ object TileRequester {
 
     /** Shows the system "Add tile?" prompt (Android 13+). [onDone] runs on the main thread with whether the tile is now added. */
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    fun request(context: Context, onDone: (Boolean) -> Unit) {
-        context.getSystemService(StatusBarManager::class.java).requestAddTileService(
-            RotationTileService.component(context),
-            context.getString(R.string.tile_label),
-            Icon.createWithResource(context, R.drawable.ic_rotation_auto),
-            context.mainExecutor,
-        ) { result ->
-            val added = result == StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ADDED ||
-                result == StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ALREADY_ADDED
+    fun request(context: Context, onDone: (Boolean) -> Unit) =
+        request(context, RotationTileService.component(context), context.getString(R.string.tile_label), R.drawable.ic_rotation_auto) { added ->
             if (added) Prefs.tileAdded = true
             onDone(added)
+        }
+
+    /** The same prompt for any of our tiles: [component] with [label] and [icon]. */
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    fun request(context: Context, component: ComponentName, label: String, @DrawableRes icon: Int, onDone: (Boolean) -> Unit) {
+        context.getSystemService(StatusBarManager::class.java).requestAddTileService(
+            component,
+            label,
+            Icon.createWithResource(context, icon),
+            context.mainExecutor,
+        ) { result ->
+            onDone(result == StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ADDED ||
+                result == StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ALREADY_ADDED)
         }
     }
 }

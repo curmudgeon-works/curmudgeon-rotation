@@ -1,37 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- SPDX-License-Identifier: GPL-3.0-only -->
-<!-- Defaults must match Prefs.kt. Which keys show in Simple mode: SimpleModeFilter.SIMPLE_KEYS. -->
+<!-- "Quick Settings tiles": one row per tile. Built-in rows open their own screens (SettingsActivity.TILE_SCREENS);
+     custom tile rows are added in code (SettingsFragment) and open TileEditorActivity.
+     Defaults must match Prefs.kt. Which keys show in Simple mode: SimpleModeFilter.SIMPLE_KEYS. -->
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <ListPreference
-        app:defaultValue="flip"
-        app:entries="@array/tile_action_entries"
-        app:entryValues="@array/tile_action_values"
-        app:iconSpaceReserved="false"
-        app:key="tile_tap_action"
-        app:title="@string/pref_tile_tap_action"
-        app:useSimpleSummaryProvider="true" />
+    <PreferenceCategory
+        app:iconSpaceReserved="true"
+        app:title="@string/tiles_builtin">
 
-    <ListPreference
-        app:defaultValue="landscape"
-        app:entries="@array/lock_tap_action_entries"
-        app:entryValues="@array/lock_tap_action_values"
-        app:iconSpaceReserved="false"
-        app:key="lock_tap_action"
-        app:title="@string/pref_lock_tap_action"
-        app:useSimpleSummaryProvider="true" />
+        <Preference
+            app:icon="@drawable/ic_rotation_auto"
+            app:key="tile_rotate"
+            app:summary="@string/tile_rotate_summary"
+            app:title="@string/tile_label" />
 
-    <SwitchPreferenceCompat
-        app:defaultValue="false"
-        app:iconSpaceReserved="false"
-        app:key="lock_release_on_turn"
-        app:summary="@string/pref_lock_release_on_turn_summary"
-        app:title="@string/pref_lock_release_on_turn" />
+        <Preference
+            app:icon="@drawable/ic_rotation_landscape"
+            app:key="tile_lock"
+            app:summary="@string/tile_lock_summary"
+            app:title="@string/tile_force_landscape_label" />
 
-    <SwitchPreferenceCompat
-        app:defaultValue="false"
-        app:iconSpaceReserved="false"
-        app:key="quick_actions_notification"
-        app:summary="@string/pref_quick_actions_summary"
-        app:title="@string/pref_quick_actions" />
+        <Preference
+            app:icon="@drawable/ic_rotation_portrait"
+            app:key="tile_portrait"
+            app:summary="@string/tile_portrait_summary"
+            app:title="@string/tile_force_portrait_label" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:iconSpaceReserved="true"
+        app:key="tiles_custom"
+        app:title="@string/tiles_custom">
+
+        <Preference
+            app:icon="@drawable/ic_add"
+            app:key="add_custom_tile"
+            app:order="100"
+            app:summary="@string/add_custom_tile_summary"
+            app:title="@string/add_custom_tile" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:iconSpaceReserved="true"
+        app:title="@string/tiles_other">
+
+        <SwitchPreferenceCompat
+            app:defaultValue="false"
+            app:key="quick_actions_notification"
+            app:summary="@string/pref_quick_actions_summary"
+            app:title="@string/pref_quick_actions" />
+    </PreferenceCategory>
 </PreferenceScreen>

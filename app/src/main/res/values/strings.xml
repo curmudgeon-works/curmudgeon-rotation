@@ -63,6 +63,8 @@
     <string name="main_status">Status</string>
     <!-- "Rotate" section on the main screen: the user's own rotation, which the tiles return to -->
     <string name="main_rotate">Rotate</string>
+    <string name="rotate_system">System default</string>
+    <string name="rotate_system_summary">Curmudgeon stays out of it: Android\'s own rotation setting applies. Apps can override.</string>
     <string name="rotate_auto">Auto-rotate</string>
     <string name="rotate_auto_summary">Android\'s own auto-rotate. Apps can still refuse to turn.</string>
     <string name="rotate_four_way">4-way auto-rotate</string>
@@ -95,12 +97,13 @@
     <string name="rotate_now_lock">hard lock</string>
     <string name="rotate_now_portrait">hard portrait lock</string>
     <string name="rotate_now_locked">Lock orientation, top of the picture at the %1$s</string>
+    <string name="rotate_now_system_auto">Android\'s auto-rotate (apps can refuse to turn)</string>
     <string name="rotate_now_system">Android\'s rotation lock, top of the picture at the %1$s (apps can override)</string>
     <string name="main_add_rule">Add rule</string>
     <string name="status_fix">Fix</string>
     <string name="status_add">Add</string>
     <string name="status_tile">Quick Settings tile</string>
-    <string name="status_tile_ok">Added. What a tap and a double-tap do is set in Settings → Tile.</string>
+    <string name="status_tile_ok">Added. What a tap and a double-tap do is set in Settings → Quick Settings tiles.</string>
     <string name="status_tile_missing">Not added yet</string>
     <string name="status_write_settings">Modify system settings</string>
     <string name="status_write_settings_ok">Allowed. The tile and rotation rules can change rotation.</string>
@@ -134,7 +137,7 @@
     <string name="setup_usage_title">Per-app rules: usage access</string>
     <string name="setup_usage_body">An alternative to the accessibility service. With usage access, Curmudgeon Rotation checks which app was opened most recently, once per poll interval (default 1 second), only while the screen is on.\n\nIt reacts a little slower than the accessibility service and needs a small ongoing notification so Android keeps it running.\n\nThe usage data is read on your device only to pick a rule. Nothing is transmitted. The app has no internet permission.\n\nOn the next screen, choose Curmudgeon Rotation and switch on \"Permit usage access\".</string>
     <string name="setup_tile_title">Add the Quick Settings tile</string>
-    <string name="setup_tile_body">Tap to rotate once: the screen turns to the other orientation, follows the phone while you hold it that way, and your previous rotation setting returns when you turn it back. Double-tap to lock landscape even in apps that insist on portrait (like HBO Max); double-tap again to release. Both can be changed in Settings → Tile. Press and hold opens this app.
+    <string name="setup_tile_body">Tap to rotate once: the screen turns to the other orientation, follows the phone while you hold it that way, and your previous rotation setting returns when you turn it back. Double-tap to lock landscape even in apps that insist on portrait (like HBO Max); double-tap again to release. Both can be changed in Settings → Quick Settings tiles. Press and hold opens this app.
 
 Choose the large tile size to see the current state written under the icon.
 
@@ -193,8 +196,44 @@ To add it yourself: swipe down twice from the top of the screen, tap the pencil 
     <string name="settings_section_detection_summary">Detection method, ignored apps, timing, start on boot</string>
     <string name="settings_section_rotation">Rotation</string>
     <string name="settings_section_rotation_summary">Restoring rotation, system setting or overlay</string>
-    <string name="settings_section_tile">Quick Settings tile</string>
-    <string name="settings_section_tile_summary">Tap actions, quick-actions notification</string>
+    <string name="settings_section_tile">Quick Settings tiles</string>
+    <string name="settings_section_tile_summary">Rotate, Lock, Portrait, your own tiles, quick-actions notification</string>
+    <!-- "Quick Settings tiles" screen: one row per tile -->
+    <string name="tiles_builtin">Built-in tiles</string>
+    <string name="tiles_custom">Your tiles</string>
+    <string name="tiles_other">Other</string>
+    <string name="tile_rotate_title">Rotate tile</string>
+    <string name="tile_rotate_summary">Tap: rotate once. Double-tap: Lock.</string>
+    <string name="tile_lock_title">Lock tile</string>
+    <string name="tile_lock_summary">Hard landscape lock. Tap again to go back.</string>
+    <string name="tile_portrait_title">Portrait tile</string>
+    <string name="tile_portrait_summary">Hard portrait lock. Tap again to go back.</string>
+    <string name="add_tile">Add to Quick Settings</string>
+    <string name="add_tile_summary">Puts this tile in your Quick Settings panel.</string>
+    <string name="add_custom_tile">Add tile</string>
+    <string name="add_custom_tile_summary">Your own name, icon and rotation.</string>
+    <!-- %1$d is how many custom tiles there can be -->
+    <string name="custom_tile_all_used">All %1$d tiles are in use. Delete one to add another.</string>
+    <!-- a custom tile slot's name in the Quick Settings editor before the app gives it the user's name -->
+    <string name="custom_tile_default_label">Rotation tile</string>
+    <string name="custom_tile_title">Tile</string>
+    <string name="custom_tile_new_title">New tile</string>
+    <string name="custom_tile_name">Name</string>
+    <string name="custom_tile_name_hint">For example: Reading</string>
+    <string name="custom_tile_icon">Icon</string>
+    <string name="custom_tile_action">When tapped</string>
+    <string name="custom_tile_action_help">Tap the tile to pick this under Rotate. Tap again to go back to what was in force before. Everything but Auto-rotate needs the accessibility service.</string>
+    <string name="custom_tile_lock_top">Lock orientation: top at the top</string>
+    <string name="custom_tile_lock_right">Lock orientation: top at the right</string>
+    <string name="custom_tile_lock_bottom">Lock orientation: top at the bottom</string>
+    <string name="custom_tile_lock_left">Lock orientation: top at the left</string>
+    <string name="custom_tile_lock_summary">Frozen in this one direction. Apps can\'t override.</string>
+    <string name="custom_tile_save">Save</string>
+    <string name="custom_tile_save_and_add">Save and add to Quick Settings</string>
+    <string name="custom_tile_no_name">Give the tile a name.</string>
+    <string name="custom_tile_delete">Delete tile</string>
+    <string name="custom_tile_delete_message">The tile is removed from Quick Settings too.</string>
+    <string name="custom_tile_delete_confirm">Delete</string>
     <string name="settings_section_rules">Rules</string>
     <string name="settings_section_rules_summary">Export, import, recently seen screens</string>
     <string name="pref_category_detection_method">Detection</string>

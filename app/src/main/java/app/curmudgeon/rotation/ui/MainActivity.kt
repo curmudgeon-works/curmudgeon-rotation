@@ -97,11 +97,17 @@ class MainActivity : AppCompatActivity() {
         binding.rulesFold.rotation = if (Prefs.rulesUnfolded) 270f else 90f
     }
 
-    /** The "Rotate" section: what holds rotation now, the five choices, and whether per-app rules win. */
+    /** The "Rotate" section: what holds rotation now, System default and the five choices, and whether per-app rules win. */
     private fun renderRotate() {
         val selected = OrientationController.selectedHome()
         binding.currentMode.text = getString(R.string.rotate_now, currentText(selected))
         binding.rotateOptions.removeAllViews()
+        ItemRotateOptionBinding.inflate(layoutInflater, binding.rotateOptions, true).apply {
+            optionRadio.isChecked = OrientationController.isSystemDefault()
+            optionTitle.setText(R.string.rotate_system)
+            optionSummary.setText(R.string.rotate_system_summary)
+            root.setOnClickListener { OrientationController.setSystemDefault() }
+        }
         for (choice in HomeChoice.entries) {
             val row = ItemRotateOptionBinding.inflate(layoutInflater, binding.rotateOptions, true)
             val usable = !choice.needsHardLock || OrientationController.canForce()
@@ -142,7 +148,10 @@ class MainActivity : AppCompatActivity() {
             return getString(R.string.rotate_now_tile, getString(R.string.tile_force_portrait_label), getString(R.string.rotate_now_portrait))
         }
         return when (selected) {
-            null -> getString(R.string.rotate_now_system, direction(OrientationController.systemRotation().userRotation))
+            null -> OrientationController.systemRotation().let {
+                if (it.autoRotate) getString(R.string.rotate_now_system_auto)
+                else getString(R.string.rotate_now_system, direction(it.userRotation))
+            }
             HomeChoice.LOCKED -> getString(R.string.rotate_now_locked, direction(Prefs.lockArrow))
             else -> getString(selected.titleRes())
         }

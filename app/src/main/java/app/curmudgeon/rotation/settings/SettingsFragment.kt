@@ -4,6 +4,7 @@ package app.curmudgeon.rotation.settings
 import app.curmudgeon.rotation.detect.EventLog
 
 import android.Manifest
+import android.content.ComponentName
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -12,12 +13,14 @@ import android.text.format.DateFormat
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.annotation.XmlRes
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
+import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import app.curmudgeon.rotation.BuildConfig
 import app.curmudgeon.rotation.Permissions
@@ -26,7 +29,16 @@ import app.curmudgeon.rotation.detect.RecentActivityLog
 import app.curmudgeon.rotation.orientation.OverlayHost
 import app.curmudgeon.rotation.rules.RuleJson
 import app.curmudgeon.rotation.rules.RuleStore
+import app.curmudgeon.rotation.tile.CustomTileSlots
+import app.curmudgeon.rotation.tile.CustomTileStore
+import app.curmudgeon.rotation.tile.LandscapeLockTileService
+import app.curmudgeon.rotation.tile.PortraitLockTileService
+import app.curmudgeon.rotation.tile.RotationTileService
+import app.curmudgeon.rotation.tile.TileRequester
+import app.curmudgeon.rotation.tile.drawableRes
+import app.curmudgeon.rotation.tile.labelRes
 import app.curmudgeon.rotation.ui.SetupActivity
+import app.curmudgeon.rotation.ui.TileEditorActivity
 import app.curmudgeon.rotation.ui.SetupTopic
 import org.json.JSONException
 import java.io.IOException
@@ -48,7 +60,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(requireArguments().getInt(ARG_XML), rootKey)
-        SettingsActivity.SECTIONS.keys.forEach { key -> find<Preference>(key)?.widgetLayoutResource = R.layout.pref_chevron }
+        (SettingsActivity.SECTIONS.keys + SettingsActivity.TILE_SCREENS.keys).forEach { key ->
+            find<Preference>(key)?.widgetLayoutResource = R.layout.pref_chevron
+        }
 
         numberPreference(PrefKeys.DEBOUNCE_MS, Prefs.DEBOUNCE_RANGE, R.string.pref_debounce_summary)
         numberPreference(PrefKeys.POLL_INTERVAL_MS, Prefs.POLL_INTERVAL_RANGE, R.string.pref_poll_interval_summary)
@@ -93,6 +107,21 @@ class SettingsFragment : PreferenceFragmentCompat() {
             true
         }
 
+        onClick(PrefKeys.ADD_TILE_ROTATE) {
+            requestTile(RotationTileService.component(requireContext()), R.string.tile_label, R.drawable.ic_rotation_auto)
+        }
+        onClick(PrefKeys.ADD_TILE_LOCK) {
+            requestTile(LandscapeLockTileService.component(requireContext()), R.string.tile_force_landscape_label, R.drawable.ic_rotation_landscape)
+        }
+        onClick(PrefKeys.ADD_TILE_PORTRAIT) {
+            requestTile(PortraitLockTileService.component(requireContext()), R.string.tile_force_portrait_label, R.drawable.ic_rotation_portrait)
+        }
+        onClick(PrefKeys.ADD_CUSTOM_TILE) {
+            val slot = CustomTileStore.freeSlot()
+            if (slot == null) toast(getString(R.string.custom_tile_all_used, CustomTileSlots.COUNT))
+            else startActivity(TileEditorActivity.intent(requireContext(), slot))
+        }
+
         onClick(PrefKeys.EXPORT_RULES) { exportLauncher.launch(EXPORT_FILE_NAME) }
         onClick(PrefKeys.IMPORT_RULES) { importLauncher.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) }
         onClick(PrefKeys.RECENT_LOG) { showRecentLog() }
@@ -120,13 +149,51 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        renderCustomTiles()
+    }
+
+    /** One row per custom tile above "Add tile", on the "Quick Settings tiles" screen only. */
+    private fun renderCustomTiles() {
+        val category = find<PreferenceCategory>(TILES_CUSTOM_CATEGORY) ?: return
+        (0 until category.preferenceCount).map(category::getPreference)
+            .filter { it.key?.startsWith(PrefKeys.CUSTOM_TILE_PREFIX) == true }
+            .forEach(category::removePreference)
+        CustomTileStore.all().forEach { tile ->
+            category.addPreference(Preference(requireContext()).apply {
+                key = PrefKeys.CUSTOM_TILE_PREFIX + tile.slot
+                order = tile.slot
+                title = tile.name
+                summary = getString(tile.target.labelRes())
+                setIcon(tile.icon.drawableRes())
+                widgetLayoutResource = R.layout.pref_chevron
+                setOnPreferenceClickListener {
+                    startActivity(TileEditorActivity.intent(requireContext(), tile.slot))
+                    true
+                }
+            })
+        }
+    }
+
+    /** The system "Add tile?" prompt (Android 13+); older versions get the how-to screen. */
+    private fun requestTile(component: ComponentName, @StringRes label: Int, @DrawableRes icon: Int) {
+        if (!TileRequester.isSupported) {
+            openSetup(SetupTopic.TILE)
+            return
+        }
+        TileRequester.request(requireContext(), component, getString(label), icon) { added ->
+            if (added && component == RotationTileService.component(requireContext())) Prefs.tileAdded = true
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         if (savedInstanceState == null) requireArguments().getString(ARG_FOCUS)?.let { key -> view.post { scrollToPreference(key) } }
     }
 
     override fun onPreferenceTreeClick(preference: Preference): Boolean {
-        val section = SettingsActivity.SECTIONS[preference.key]
+        val section = SettingsActivity.SECTIONS[preference.key] ?: SettingsActivity.TILE_SCREENS[preference.key]
         val activity = activity as? SettingsActivity
         if (section == null || activity == null) return super.onPreferenceTreeClick(preference)
         activity.show(section.xml, section.title)
@@ -242,6 +309,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
     private fun toast(message: String) = Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
 
     companion object {
+        /** Category on prefs_tile.xml holding the custom tile rows. */
+        private const val TILES_CUSTOM_CATEGORY = "tiles_custom"
         private const val EXPORT_FILE_NAME = "curmudgeon-rotation-rules.json"
         private const val ARG_XML = "xml"
         private const val ARG_TITLE = "title"

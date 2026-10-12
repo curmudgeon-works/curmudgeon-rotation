@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+<!-- The built-in "Lock" tile (its action is also the Rotate tile's double-tap). Defaults must match Prefs.kt. -->
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <Preference
+        app:iconSpaceReserved="false"
+        app:key="add_tile_lock"
+        app:summary="@string/add_tile_summary"
+        app:title="@string/add_tile" />
+
+    <ListPreference
+        app:defaultValue="landscape"
+        app:entries="@array/lock_tap_action_entries"
+        app:entryValues="@array/lock_tap_action_values"
+        app:iconSpaceReserved="false"
+        app:key="lock_tap_action"
+        app:title="@string/pref_lock_tap_action"
+        app:useSimpleSummaryProvider="true" />
+
+    <SwitchPreferenceCompat
+        app:defaultValue="false"
+        app:iconSpaceReserved="false"
+        app:key="lock_release_on_turn"
+        app:summary="@string/pref_lock_release_on_turn_summary"
+        app:title="@string/pref_lock_release_on_turn" />
+</PreferenceScreen>

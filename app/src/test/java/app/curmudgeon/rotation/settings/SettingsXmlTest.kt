@@ -27,6 +27,15 @@ class SettingsXmlTest {
         "section_rules" to "prefs_rules",
     )
 
+    /** Screens opened from rows on a section screen (the built-in tiles under "Quick Settings tiles"). */
+    private val subscreens = mapOf(
+        "tile_rotate" to "prefs_tile_rotate",
+        "tile_lock" to "prefs_tile_lock",
+        "tile_portrait" to "prefs_tile_portrait",
+    )
+
+    private val screens get() = sections.values + subscreens.values
+
     @Test
     fun homeListsEverySectionThenAbout() {
         assertEquals(sections.keys.toList() + PrefKeys.ABOUT, keys("prefs_root"))
@@ -34,18 +43,18 @@ class SettingsXmlTest {
 
     @Test
     fun everySettingLivesOnExactlyOneSectionScreen() {
-        val placed = sections.values.flatMap { keys(it) }
+        val placed = screens.flatMap { keys(it) }
         val expected = PrefKeys::class.java.declaredFields
             .filter { java.lang.reflect.Modifier.isStatic(it.modifiers) && it.type == String::class.java }
-            .map { it.get(null) as String } - PrefKeys.ADVANCED_MODE - PrefKeys.ABOUT
+            .map { it.get(null) as String } - PrefKeys.ADVANCED_MODE - PrefKeys.ABOUT - PrefKeys.CUSTOM_TILE_PREFIX
         assertEquals(placed.size, placed.toSet().size)
         assertEquals(expected.toSet(), placed.toSet())
     }
 
     @Test
     fun everySectionHasASimpleSetting() {
-        sections.values.forEach { assertTrue(it, SimpleModeFilter.isSectionShown(keys(it), advanced = false)) }
-        assertTrue(SimpleModeFilter.SIMPLE_KEYS.all { key -> key == PrefKeys.ABOUT || sections.values.any { key in keys(it) } })
+        screens.forEach { assertTrue(it, SimpleModeFilter.isSectionShown(keys(it), advanced = false)) }
+        assertTrue(SimpleModeFilter.SIMPLE_KEYS.all { key -> key == PrefKeys.ABOUT || screens.any { key in keys(it) } })
     }
 
     private companion object {

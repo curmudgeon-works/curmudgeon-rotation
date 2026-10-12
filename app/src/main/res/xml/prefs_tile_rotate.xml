@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+<!-- The built-in "Rotate" tile. Defaults must match Prefs.kt. -->
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <Preference
+        app:iconSpaceReserved="false"
+        app:key="add_tile_rotate"
+        app:summary="@string/add_tile_summary"
+        app:title="@string/add_tile" />
+
+    <ListPreference
+        app:defaultValue="flip"
+        app:entries="@array/tile_action_entries"
+        app:entryValues="@array/tile_action_values"
+        app:iconSpaceReserved="false"
+        app:key="tile_tap_action"
+        app:title="@string/pref_tile_tap_action"
+        app:useSimpleSummaryProvider="true" />
+</PreferenceScreen>

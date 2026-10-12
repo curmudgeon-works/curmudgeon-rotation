@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+<!-- The built-in "Portrait" tile: nothing to set, only adding it. -->
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <Preference
+        app:iconSpaceReserved="false"
+        app:key="add_tile_portrait"
+        app:summary="@string/add_tile_summary"
+        app:title="@string/add_tile" />
+</PreferenceScreen>

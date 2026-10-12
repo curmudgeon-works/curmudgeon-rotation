@@ -12,13 +12,21 @@ object SimpleModeFilter {
         PrefKeys.TILE_TAP_ACTION,
         PrefKeys.LOCK_TAP_ACTION,
         PrefKeys.LOCK_RELEASE_ON_TURN,
+        PrefKeys.TILE_ROTATE,
+        PrefKeys.TILE_LOCK,
+        PrefKeys.TILE_PORTRAIT,
+        PrefKeys.ADD_TILE_ROTATE,
+        PrefKeys.ADD_TILE_LOCK,
+        PrefKeys.ADD_TILE_PORTRAIT,
+        PrefKeys.ADD_CUSTOM_TILE,
         PrefKeys.EXPORT_RULES,
         PrefKeys.IMPORT_RULES,
         PrefKeys.ABOUT,
     )
 
-    /** Whether a single setting shows: every setting in advanced mode, only [SIMPLE_KEYS] otherwise. */
-    fun isShown(key: String?, advanced: Boolean): Boolean = advanced || key in SIMPLE_KEYS
+    /** Whether a single setting shows: every setting in advanced mode, only [SIMPLE_KEYS] (and custom tiles) otherwise. */
+    fun isShown(key: String?, advanced: Boolean): Boolean =
+        advanced || key in SIMPLE_KEYS || key?.startsWith(PrefKeys.CUSTOM_TILE_PREFIX) == true
 
     /** Whether the home row of a section holding [sectionKeys] shows: hidden in simple mode when none of them is simple. */
     fun isSectionShown(sectionKeys: Collection<String>, advanced: Boolean): Boolean = advanced || sectionKeys.any { it in SIMPLE_KEYS }

@@ -123,13 +123,29 @@ object OrientationController {
         systemSettings.read().let { home.system(it, Prefs.lockArrow).isStillIn(it) }
 
     /**
-     * The choice under "Rotate" shown as selected: none while a tile holds rotation; Auto-rotate when the system has
-     * auto-rotate on and nothing else is chosen.
+     * The choice under "Rotate" shown as selected: none while a tile holds rotation, or when nothing is chosen
+     * ("System default" then shows as selected, see [isSystemDefault]).
      */
     fun selectedHome(): HomeChoice? = when {
         flip != null || forcedFrom != null -> null
         else -> Prefs.homeChoice?.takeIf { homeHolds(it) }
-            ?: HomeChoice.AUTO.takeIf { systemSettings.read().autoRotate }
+    }
+
+    /** Whether "System default" shows as selected under "Rotate": no tile holds rotation and no choice is in force. */
+    fun isSystemDefault(): Boolean = flip == null && forcedFrom == null && selectedHome() == null
+
+    /**
+     * Picks "System default" under "Rotate": a running flip or Lock ends and our choice is dropped, without writing
+     * anything, so Android's own rotation setting (its Auto-rotate tile) is what applies from here. [restore]: the
+     * system settings to put back first (a custom tile going back to the system default it started from).
+     */
+    fun setSystemDefault(restore: SystemRotation? = null) {
+        endFlip()
+        if (restore != null && systemSettings.canWrite()) session.applyManual(restore)
+        EventLog.log("rotate: system default (${if (restore != null) "restored $restore" else "nothing written"}, now ${systemSettings.read()})")
+        Prefs.homeChoice = null
+        applyOverlay()
+        notifyChanged()
     }
 
     /**

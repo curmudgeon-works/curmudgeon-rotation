@@ -12,6 +12,7 @@ import app.curmudgeon.rotation.rules.RuleStore
 import app.curmudgeon.rotation.service.RotationService
 import app.curmudgeon.rotation.settings.PrefKeys
 import app.curmudgeon.rotation.settings.Prefs
+import app.curmudgeon.rotation.tile.CustomTileStore
 import app.curmudgeon.rotation.tile.LandscapeLockTileService
 import app.curmudgeon.rotation.tile.PortraitLockTileService
 import app.curmudgeon.rotation.tile.RotationTileService
@@ -39,6 +40,7 @@ class CurmudgeonApp : Application() {
         super.onCreate()
         Prefs.init(this)
         RuleStore.init(Prefs.state)
+        CustomTileStore.init(this, Prefs.state)
         RecentActivityLog.init(Prefs.state)
         EventLog.init(Prefs.state)
         OrientationController.init(this)
@@ -54,6 +56,7 @@ class CurmudgeonApp : Application() {
             RotationTileService.requestUpdate(this)
             LandscapeLockTileService.requestUpdate(this)
             PortraitLockTileService.requestUpdate(this)
+            CustomTileStore.requestUpdates(this)
             RotationService.sync(this) // a finished flip no longer needs the service
         }
     }
