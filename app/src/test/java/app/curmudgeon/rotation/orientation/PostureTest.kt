@@ -43,4 +43,15 @@ class PostureTest {
         assertFalse(tracker.onSample(Posture.LANDSCAPE, 350))
         assertTrue(tracker.onSample(Posture.LANDSCAPE, 650))
     }
+
+    @Test
+    fun upsideDownOnlyNearUprightOrUpsideDown() {
+        assertEquals(false, Posture.upsideDown(0))
+        assertEquals(false, Posture.upsideDown(340))
+        assertEquals(true, Posture.upsideDown(180))
+        assertEquals(true, Posture.upsideDown(205))
+        assertEquals(null, Posture.upsideDown(90))
+        assertEquals(null, Posture.upsideDown(250))
+        assertEquals(null, Posture.upsideDown(-1))
+    }
 }

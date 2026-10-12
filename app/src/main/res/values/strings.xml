@@ -70,9 +70,9 @@
     <string name="rotate_locked">Lock orientation</string>
     <!-- %1$s is a direction from rotate_direction_* -->
     <string name="rotate_locked_summary">Frozen with the top of the picture at the %1$s. Tap the arrow to turn it. Apps can\'t override.</string>
-    <string name="rotate_portrait_flip">Portrait, flippable</string>
+    <string name="rotate_portrait_flip">Portrait lock, flippable</string>
     <string name="rotate_portrait_flip_summary">Always portrait. Turning the phone over switches between the two portrait sides. Apps can\'t override.</string>
-    <string name="rotate_landscape_flip">Landscape, flippable</string>
+    <string name="rotate_landscape_flip">Landscape lock, flippable</string>
     <string name="rotate_landscape_flip_summary">Always landscape. Turning the phone switches between the two landscape sides. Apps can\'t override.</string>
     <string name="rotate_needs_hard_lock">Needs the accessibility service: tap to set it up.</string>
     <string name="rotate_turn_arrow">Turn the arrow (now: top at the %1$s)</string>

@@ -35,7 +35,8 @@ class HomeChoiceTest {
         assertNull(HomeChoice.AUTO.overlay(0))
         for (choice in HomeChoice.entries - HomeChoice.AUTO) assertTrue(choice.needsHardLock)
         assertEquals(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR, HomeChoice.FOUR_WAY.overlay(0))
-        assertEquals(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT, HomeChoice.PORTRAIT_FLIP.overlay(0))
+        assertEquals(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, HomeChoice.PORTRAIT_FLIP.overlay(0))
+        assertEquals(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT, HomeChoice.PORTRAIT_FLIP.overlay(0, upsideDown = true))
         assertEquals(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE, HomeChoice.LANDSCAPE_FLIP.overlay(0))
     }
 

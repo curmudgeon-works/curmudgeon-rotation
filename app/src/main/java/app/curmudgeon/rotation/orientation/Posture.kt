@@ -11,6 +11,17 @@ enum class Posture {
         fun of(landscape: Boolean): Posture = if (landscape) LANDSCAPE else PORTRAIT
 
         /**
+         * For "Portrait lock, flippable": true when [degrees] is within [MARGIN] of upside down, false within [MARGIN]
+         * of upright, null otherwise (sideways, in between, or flat).
+         */
+        fun upsideDown(degrees: Int): Boolean? = when {
+            degrees < 0 -> null
+            degrees <= MARGIN || degrees >= 360 - MARGIN -> false
+            degrees in 180 - MARGIN..180 + MARGIN -> true
+            else -> null
+        }
+
+        /**
          * [degrees] as reported by OrientationEventListener (0–359, or negative when the phone lies flat).
          * Within [MARGIN] of upright or upside down is portrait, within [MARGIN] of either side is landscape;
          * in between is unknown, so a tilt halfway doesn't count as either.

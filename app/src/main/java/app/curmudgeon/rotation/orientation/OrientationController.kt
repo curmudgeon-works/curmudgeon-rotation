@@ -44,6 +44,10 @@ object OrientationController {
     /** The Lock is the "Portrait" tile's hard portrait lock rather than a landscape one. */
     private var forcedPortrait = false
     private var forcedWatcher: TurnWatcher? = null
+    /** Follows the portrait side while "Portrait lock, flippable" is in force and the screen is on. */
+    private var portraitWatcher: TurnWatcher? = null
+    private var portraitUpsideDown = false
+    private var screenOn = true
     private val listeners = CopyOnWriteArraySet<() -> Unit>()
 
     fun init(context: Context) {
@@ -52,13 +56,19 @@ object OrientationController {
         session = SystemRotationSession(systemSettings, Prefs.rotationStateStore)
         systemSettings.observe(::onSystemRotationChanged)
         // only ever delivered while the process lives, which a waiting flip already needs
-        ContextCompat.registerReceiver(appContext, screenOffReceiver, IntentFilter(Intent.ACTION_SCREEN_OFF), ContextCompat.RECEIVER_NOT_EXPORTED)
+        val screen = IntentFilter(Intent.ACTION_SCREEN_OFF).apply { addAction(Intent.ACTION_SCREEN_ON) }
+        ContextCompat.registerReceiver(appContext, screenOffReceiver, screen, ContextCompat.RECEIVER_NOT_EXPORTED)
     }
 
-    /** The screen went off on a flip still waiting for its first turn: nobody is about to turn the phone, so it goes home. */
+    /**
+     * The screen went off on a flip still waiting for its first turn: nobody is about to turn the phone, so it goes home.
+     * Screen off also pauses following the portrait side (no sensor use while nobody looks); screen on resumes it.
+     */
     private val screenOffReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            if (flip?.phase == FlipPhase.TURNING) cancelFlip()
+            screenOn = intent.action != Intent.ACTION_SCREEN_OFF
+            if (!screenOn && flip?.phase == FlipPhase.TURNING) cancelFlip()
+            applyOverlay()
         }
     }
 
@@ -339,7 +349,7 @@ object OrientationController {
     }
 
     /** Whether the orientation sensor is in use (a flip, or a Lock set to release on turn); needs the process kept alive. */
-    val isWatchingSensor: Boolean get() = flip != null || forcedWatcher != null
+    val isWatchingSensor: Boolean get() = flip != null || forcedWatcher != null || portraitWatcher != null
 
     /** A tile flip is running (it needs to hear of other apps: leaving the app ends one still waiting). */
     val isFlipping: Boolean get() = flip != null
@@ -431,6 +441,9 @@ object OrientationController {
     fun removeListener(listener: () -> Unit) = listeners.remove(listener)
 
     private fun applyOverlay(): Boolean {
+        // the Rotate choice in force: no tile or rule holds rotation, and the settings still hold what it wrote
+        val home = Prefs.homeChoice?.takeIf { forcedFrom == null && flip == null && !ruleActive && homeHolds(it) }
+        followPortraitSide(home == HomeChoice.PORTRAIT_FLIP)
         val manual = when {
             forcedPortrait -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             forcedFrom != null -> forcedStep?.overlayOrientation ?: ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
@@ -438,7 +451,7 @@ object OrientationController {
                 if (flip!!.toLandscape) ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
             // per-app rules win over the Rotate choice
             Prefs.homeChoice != null && ruleActive -> null
-            Prefs.homeChoice?.takeIf { homeHolds(it) } != null -> Prefs.homeChoice!!.overlay(Prefs.lockArrow)
+            home != null -> home.overlay(Prefs.lockArrow, portraitUpsideDown)
             // only a manual choice the settings still hold: a stale one must never hard-lock the screen
             Prefs.tileMechanism == TileMechanism.OVERLAY && flip == null ->
                 Prefs.manualMode.takeIf { ManualModeResolver.consistent(it, OrientationMode.fromSystemRotation(systemSettings.read())) }
@@ -446,6 +459,25 @@ object OrientationController {
             else -> null
         }
         return OverlayHost.set(appContext, ruleOverlay ?: manual)
+    }
+
+    /** Starts or stops following the portrait side for "Portrait lock, flippable" ([active]), only while the screen is on. */
+    private fun followPortraitSide(active: Boolean) {
+        if (active && screenOn) {
+            if (portraitWatcher != null) return
+            portraitWatcher = PortraitSideWatcher(appContext) { upsideDown ->
+                if (upsideDown != portraitUpsideDown) {
+                    portraitUpsideDown = upsideDown
+                    EventLog.log("portrait lock: phone held ${if (upsideDown) "upside down" else "upright"}")
+                    applyOverlay()
+                }
+            }.also { it.start() }
+        } else {
+            portraitWatcher?.stop()
+            portraitWatcher = null
+            // screen off keeps the side for when it comes back on; leaving the choice starts upright next time
+            if (!active) portraitUpsideDown = false
+        }
     }
 
     private fun notifyChanged() = listeners.forEach { it() }

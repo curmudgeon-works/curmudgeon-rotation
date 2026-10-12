@@ -44,6 +44,42 @@ class SensorTurnWatcher(context: Context, private val target: Posture, private v
 }
 
 /**
+ * For "Portrait lock, flippable": follows which way up the phone is held while started, and calls [onSide] (true =
+ * upside down) once a side has held for [stableMs]. Needed because Android won't turn a phone upside down for
+ * SENSOR_PORTRAIT unless the device allows all rotations, which Pixels don't.
+ */
+class PortraitSideWatcher(
+    context: Context,
+    private val stableMs: Long = 300,
+    private val onSide: (upsideDown: Boolean) -> Unit,
+) : TurnWatcher {
+    private var candidate: Boolean? = null
+    private var since = 0L
+    private var reported: Boolean? = null
+
+    private val listener = object : OrientationEventListener(context, SensorManager.SENSOR_DELAY_NORMAL) {
+        override fun onOrientationChanged(orientation: Int) {
+            val side = Posture.upsideDown(orientation) ?: return run { candidate = null }
+            val now = SystemClock.uptimeMillis()
+            if (side != candidate) {
+                candidate = side
+                since = now
+            }
+            if (side != reported && now - since >= stableMs) {
+                reported = side
+                onSide(side)
+            }
+        }
+    }
+
+    override fun start() {
+        if (listener.canDetectOrientation()) listener.enable()
+    }
+
+    override fun stop() = listener.disable()
+}
+
+/**
  * Watches the built-in display until it shows landscape ([landscape] true) or portrait, then calls [onTurned] once
  * on the main thread. With [timeoutMs], calls [onTimeout] instead if that doesn't happen in time.
  *

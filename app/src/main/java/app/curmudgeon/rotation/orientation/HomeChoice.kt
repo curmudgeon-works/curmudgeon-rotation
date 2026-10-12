@@ -15,7 +15,7 @@ enum class HomeChoice(val value: String) {
     /** Follows the sensor to all four sides, upside down too. */
     FOUR_WAY("four_way"),
     LOCKED("locked"),
-    /** Either portrait side, following the sensor between them. */
+    /** Either portrait side, following the sensor between them (the controller tells [overlay] which side). */
     PORTRAIT_FLIP("portrait_flip"),
     /** Either landscape side, following the sensor between them. */
     LANDSCAPE_FLIP("landscape_flip");
@@ -30,12 +30,13 @@ enum class HomeChoice(val value: String) {
         LANDSCAPE_FLIP -> SystemRotation(autoRotate = false, userRotation = Surface.ROTATION_90)
     }
 
-    /** Orientation for the overlay window, or null for none. */
-    fun overlay(arrow: Int): Int? = when (this) {
+    /** Orientation for the overlay window, or null for none; [upsideDown] is the portrait side the phone is held in. */
+    fun overlay(arrow: Int, upsideDown: Boolean = false): Int? = when (this) {
         AUTO -> null
         FOUR_WAY -> ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
         LOCKED -> lockedOrientation(arrow)
-        PORTRAIT_FLIP -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
+        // not SENSOR_PORTRAIT: phones that don't allow all rotations (Pixels) never turn upside down for it
+        PORTRAIT_FLIP -> if (upsideDown) ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT else ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         LANDSCAPE_FLIP -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
     }
 
