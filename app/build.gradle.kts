@@ -15,8 +15,8 @@ android {
         applicationId = "app.curmudgeon.rotation"
         minSdk = 26
         targetSdk = 36
-        versionCode = 7
-        versionName = "0.1.6"
+        versionCode = 1006
+        versionName = "0.1.006"
     }
 
     // the app is English-only; drops ~40 unused library translations from the APK
