@@ -16,6 +16,20 @@
             app:title="@string/pref_restore" />
     </PreferenceCategory>
 
+    <!-- moved here from the Lock tile's screen when built-in tiles stopped being changeable -->
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:key="category_lock"
+        app:title="@string/pref_category_lock">
+
+        <SwitchPreferenceCompat
+            app:defaultValue="false"
+            app:iconSpaceReserved="false"
+            app:key="lock_release_on_turn"
+            app:summary="@string/pref_lock_release_on_turn_summary"
+            app:title="@string/pref_lock_release_on_turn" />
+    </PreferenceCategory>
+
     <PreferenceCategory
         app:iconSpaceReserved="false"
         app:key="category_mechanism"

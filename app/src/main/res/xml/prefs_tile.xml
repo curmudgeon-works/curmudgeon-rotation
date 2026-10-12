@@ -1,54 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- SPDX-License-Identifier: GPL-3.0-only -->
-<!-- "Quick Settings tiles": one row per tile. Built-in rows open their own screens (SettingsActivity.TILE_SCREENS);
-     custom tile rows are added in code (SettingsFragment) and open TileEditorActivity.
-     Defaults must match Prefs.kt. Which keys show in Simple mode: SimpleModeFilter.SIMPLE_KEYS. -->
+<!-- "Quick Settings tiles": one row per tile, no groups. Built-in rows open their own screens (SettingsActivity.TILE_SCREENS);
+     custom tile rows are added in code (SettingsFragment, order 100 + slot) and open TileEditorActivity.
+     The quick-actions notification sits below a divider. Defaults must match Prefs.kt.
+     Which keys show in Simple mode: SimpleModeFilter.SIMPLE_KEYS. -->
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory
+    <Preference
+        app:icon="@drawable/ic_rotation_auto"
+        app:key="tile_rotate"
+        app:order="0"
+        app:summary="@string/tile_rotate_summary"
+        app:title="@string/tile_label" />
+
+    <Preference
+        app:icon="@drawable/ic_rotation_landscape"
+        app:key="tile_lock"
+        app:order="1"
+        app:summary="@string/tile_lock_summary"
+        app:title="@string/tile_force_landscape_label" />
+
+    <Preference
+        app:icon="@drawable/ic_rotation_portrait"
+        app:key="tile_portrait"
+        app:order="2"
+        app:summary="@string/tile_portrait_summary"
+        app:title="@string/tile_force_portrait_label" />
+
+    <Preference
+        app:icon="@drawable/ic_add"
+        app:key="add_custom_tile"
+        app:order="200"
+        app:summary="@string/add_custom_tile_summary"
+        app:title="@string/add_custom_tile" />
+
+    <Preference
+        app:key="tiles_divider"
+        app:layout="@layout/pref_divider"
+        app:order="300"
+        app:selectable="false" />
+
+    <SwitchPreferenceCompat
+        app:defaultValue="false"
         app:iconSpaceReserved="true"
-        app:title="@string/tiles_builtin">
-
-        <Preference
-            app:icon="@drawable/ic_rotation_auto"
-            app:key="tile_rotate"
-            app:summary="@string/tile_rotate_summary"
-            app:title="@string/tile_label" />
-
-        <Preference
-            app:icon="@drawable/ic_rotation_landscape"
-            app:key="tile_lock"
-            app:summary="@string/tile_lock_summary"
-            app:title="@string/tile_force_landscape_label" />
-
-        <Preference
-            app:icon="@drawable/ic_rotation_portrait"
-            app:key="tile_portrait"
-            app:summary="@string/tile_portrait_summary"
-            app:title="@string/tile_force_portrait_label" />
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        app:iconSpaceReserved="true"
-        app:key="tiles_custom"
-        app:title="@string/tiles_custom">
-
-        <Preference
-            app:icon="@drawable/ic_add"
-            app:key="add_custom_tile"
-            app:order="100"
-            app:summary="@string/add_custom_tile_summary"
-            app:title="@string/add_custom_tile" />
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        app:iconSpaceReserved="true"
-        app:title="@string/tiles_other">
-
-        <SwitchPreferenceCompat
-            app:defaultValue="false"
-            app:key="quick_actions_notification"
-            app:summary="@string/pref_quick_actions_summary"
-            app:title="@string/pref_quick_actions" />
-    </PreferenceCategory>
+        app:key="quick_actions_notification"
+        app:order="301"
+        app:summary="@string/pref_quick_actions_summary"
+        app:title="@string/pref_quick_actions" />
 </PreferenceScreen>

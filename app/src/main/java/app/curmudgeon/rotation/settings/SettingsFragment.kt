@@ -5,6 +5,7 @@ import app.curmudgeon.rotation.detect.EventLog
 
 import android.Manifest
 import android.content.ComponentName
+import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -17,10 +18,10 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.annotation.XmlRes
 import androidx.appcompat.app.AlertDialog
+import androidx.preference.CheckBoxPreference
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
-import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import app.curmudgeon.rotation.BuildConfig
 import app.curmudgeon.rotation.Permissions
@@ -34,6 +35,7 @@ import app.curmudgeon.rotation.tile.CustomTileStore
 import app.curmudgeon.rotation.tile.LandscapeLockTileService
 import app.curmudgeon.rotation.tile.PortraitLockTileService
 import app.curmudgeon.rotation.tile.RotationTileService
+import app.curmudgeon.rotation.tile.TilePresence
 import app.curmudgeon.rotation.tile.TileRequester
 import app.curmudgeon.rotation.tile.drawableRes
 import app.curmudgeon.rotation.tile.labelRes
@@ -107,14 +109,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
             true
         }
 
-        onClick(PrefKeys.ADD_TILE_ROTATE) {
-            requestTile(RotationTileService.component(requireContext()), R.string.tile_label, R.drawable.ic_rotation_auto)
-        }
-        onClick(PrefKeys.ADD_TILE_LOCK) {
-            requestTile(LandscapeLockTileService.component(requireContext()), R.string.tile_force_landscape_label, R.drawable.ic_rotation_landscape)
-        }
-        onClick(PrefKeys.ADD_TILE_PORTRAIT) {
-            requestTile(PortraitLockTileService.component(requireContext()), R.string.tile_force_portrait_label, R.drawable.ic_rotation_portrait)
+        BUILT_IN_TILES.forEach { builtIn ->
+            find<CheckBoxPreference>(builtIn.key)?.setOnPreferenceChangeListener { preference, value ->
+                setAdded(builtIn, preference as CheckBoxPreference, value == true)
+                false // the box follows what actually happened (set in setAdded)
+            }
         }
         onClick(PrefKeys.ADD_CUSTOM_TILE) {
             val slot = CustomTileStore.freeSlot()
@@ -152,20 +151,22 @@ class SettingsFragment : PreferenceFragmentCompat() {
     override fun onResume() {
         super.onResume()
         renderCustomTiles()
+        // a tile may have been added or taken out in Quick Settings meanwhile
+        BUILT_IN_TILES.forEach { find<CheckBoxPreference>(it.key)?.isChecked = TilePresence.isAdded(it.id) }
     }
 
-    /** One row per custom tile above "Add tile", on the "Quick Settings tiles" screen only. */
+    /** One row per custom tile, between the built-in tiles and "Add tile", on the "Quick Settings tiles" screen only. */
     private fun renderCustomTiles() {
-        val category = find<PreferenceCategory>(TILES_CUSTOM_CATEGORY) ?: return
-        (0 until category.preferenceCount).map(category::getPreference)
+        val screen = preferenceScreen.takeIf { find<Preference>(PrefKeys.ADD_CUSTOM_TILE) != null } ?: return
+        (0 until screen.preferenceCount).map(screen::getPreference)
             .filter { it.key?.startsWith(PrefKeys.CUSTOM_TILE_PREFIX) == true }
-            .forEach(category::removePreference)
+            .forEach(screen::removePreference)
         CustomTileStore.all().forEach { tile ->
-            category.addPreference(Preference(requireContext()).apply {
+            screen.addPreference(Preference(requireContext()).apply {
                 key = PrefKeys.CUSTOM_TILE_PREFIX + tile.slot
-                order = tile.slot
+                order = CUSTOM_TILE_ORDER + tile.slot
                 title = tile.name
-                summary = getString(tile.target.labelRes())
+                summary = getString(tile.tap.labelRes())
                 setIcon(tile.icon.drawableRes())
                 widgetLayoutResource = R.layout.pref_chevron
                 setOnPreferenceClickListener {
@@ -176,16 +177,36 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
     }
 
-    /** The system "Add tile?" prompt (Android 13+); older versions get the how-to screen. */
-    private fun requestTile(component: ComponentName, @StringRes label: Int, @DrawableRes icon: Int) {
+    /**
+     * A built-in tile's "Add to Quick Settings" box. Ticked: the system "Add tile?" prompt (Android 13+; older versions
+     * get the how-to screen). Unticked: takes the tile out of Quick Settings.
+     */
+    private fun setAdded(builtIn: BuiltInTile, box: CheckBoxPreference, added: Boolean) {
+        val context = requireContext().applicationContext
+        val component = builtIn.component(context)
+        if (!added) {
+            TilePresence.remove(context, builtIn.id, component) { TilePresence.restoreBuiltIn(context, component) }
+            box.isChecked = false
+            return
+        }
         if (!TileRequester.isSupported) {
             openSetup(SetupTopic.TILE)
             return
         }
-        TileRequester.request(requireContext(), component, getString(label), icon) { added ->
-            if (added && component == RotationTileService.component(requireContext())) Prefs.tileAdded = true
+        TileRequester.request(requireContext(), component, getString(builtIn.label), builtIn.icon) { done ->
+            if (done) TilePresence.onAdded(builtIn.id)
+            box.isChecked = done
         }
     }
+
+    /** A built-in tile's "Add to Quick Settings" box ([key]) and what the tile is. */
+    private class BuiltInTile(
+        val key: String,
+        val id: String,
+        val component: (Context) -> ComponentName,
+        @param:StringRes val label: Int,
+        @param:DrawableRes val icon: Int,
+    )
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -309,8 +330,14 @@ class SettingsFragment : PreferenceFragmentCompat() {
     private fun toast(message: String) = Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
 
     companion object {
-        /** Category on prefs_tile.xml holding the custom tile rows. */
-        private const val TILES_CUSTOM_CATEGORY = "tiles_custom"
+        /** Custom tile rows sit after the built-in tiles (orders 0-2) and before "Add tile" (200): see prefs_tile.xml. */
+        private const val CUSTOM_TILE_ORDER = 100
+
+        private val BUILT_IN_TILES = listOf(
+            BuiltInTile(PrefKeys.ADD_TILE_ROTATE, TilePresence.ROTATE, { RotationTileService.component(it) }, R.string.tile_label, R.drawable.ic_rotation_auto),
+            BuiltInTile(PrefKeys.ADD_TILE_LOCK, TilePresence.LOCK, { LandscapeLockTileService.component(it) }, R.string.tile_force_landscape_label, R.drawable.ic_rotation_landscape),
+            BuiltInTile(PrefKeys.ADD_TILE_PORTRAIT, TilePresence.PORTRAIT, { PortraitLockTileService.component(it) }, R.string.tile_force_portrait_label, R.drawable.ic_rotation_portrait),
+        )
         private const val EXPORT_FILE_NAME = "curmudgeon-rotation-rules.json"
         private const val ARG_XML = "xml"
         private const val ARG_TITLE = "title"

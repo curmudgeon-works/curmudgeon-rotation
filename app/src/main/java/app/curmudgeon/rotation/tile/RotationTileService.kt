@@ -17,34 +17,29 @@ import android.service.quicksettings.TileService
 import android.view.ViewConfiguration
 import app.curmudgeon.rotation.R
 import app.curmudgeon.rotation.orientation.OrientationController
-import app.curmudgeon.rotation.orientation.OrientationMode
 import app.curmudgeon.rotation.service.RotationService
-import app.curmudgeon.rotation.settings.Prefs
+import app.curmudgeon.rotation.settings.LockTapAction
 import app.curmudgeon.rotation.ui.flipLabel
 import app.curmudgeon.rotation.ui.labelRes
 
 /**
- * Tap runs the tap action from settings (default: rotate once); double-tap runs the Lock action (the second tile's
- * tap, hard landscape by default). Long-press opens the app: the system launches an activity for it, which ejects a
+ * Tap rotates once ([TileAction.FLIP]); double-tap runs the Lock tile's tap (hard landscape). Both are fixed: other
+ * actions live on custom tiles. Long-press opens the app: the system launches an activity for it, which ejects a
  * fullscreen app to picture-in-picture, so no rotation action can live there. Works without the detection service.
  *
  * When the mechanism's permission is missing the tile stays clickable (STATE_UNAVAILABLE tiles
  * receive no clicks) but shows "Tap to set up" and opens the explanation screen.
  */
 class RotationTileService : TileService() {
-    override fun onTileAdded() {
-        Prefs.tileAdded = true
-    }
+    override fun onTileAdded() = TilePresence.onAdded(TilePresence.ROTATE)
 
-    override fun onTileRemoved() {
-        Prefs.tileAdded = false
-    }
+    override fun onTileRemoved() = TilePresence.onRemoved(TilePresence.ROTATE)
 
     // requestListeningState does nothing while the panel already shows the tile, so a flip ending then redraws it here
     private val onRotationChanged: () -> Unit = { updateTile() }
 
     override fun onStartListening() {
-        Prefs.tileAdded = true
+        TilePresence.onAdded(TilePresence.ROTATE)
         OrientationController.addListener(onRotationChanged)
         updateTile()
     }
@@ -70,19 +65,19 @@ class RotationTileService : TileService() {
         pendingTap?.let { tap ->
             handler.removeCallbacks(tap)
             pendingTap = null
-            EventLog.log("tile: double-tap → ${Prefs.lockTapAction}")
-            run(Prefs.lockTapAction.perform(this))
+            EventLog.log("tile: double-tap → $DOUBLE_TAP")
+            run(DOUBLE_TAP.perform(this))
             return
         }
-        if (!OrientationController.isManualAvailable() || Prefs.tileTapAction == TileAction.OPEN_APP) {
-            EventLog.log("tile: tap → ${Prefs.tileTapAction} (no wait)")
-            run(Prefs.tileTapAction.perform(this))
+        if (!OrientationController.isManualAvailable()) {
+            EventLog.log("tile: tap → $TAP (no wait)")
+            run(TAP.perform(this))
             return
         }
         val tap = Runnable {
             pendingTap = null
-            EventLog.log("tile: tap → ${Prefs.tileTapAction}")
-            run(Prefs.tileTapAction.perform(this))
+            EventLog.log("tile: tap → $TAP")
+            run(TAP.perform(this))
         }
         pendingTap = tap
         handler.postDelayed(tap, DOUBLE_TAP_MS)
@@ -115,12 +110,7 @@ class RotationTileService : TileService() {
                     else -> R.drawable.ic_rotation_auto
                 },
             )
-            val active = flipping || locked || when (Prefs.tileTapAction) {
-                TileAction.FLIP -> false
-                TileAction.TOGGLE_AUTO_ROTATE -> mode == OrientationMode.AUTO
-                else -> mode != OrientationMode.OFF
-            }
-            tile.state = if (active) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
+            tile.state = if (flipping || locked) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
             val subtitle = flipLabel(mode) ?: when {
                 mode.isLandscapeLock() && !OrientationController.isHardLockAvailable() -> getString(R.string.tile_soft_lock, getString(mode.labelRes()))
                 else -> getString(mode.labelRes())
@@ -156,6 +146,9 @@ class RotationTileService : TileService() {
     }
 
     companion object {
+        private val TAP = TileAction.FLIP
+        private val DOUBLE_TAP = LockTapAction.LANDSCAPE
+
         /** How long a tap waits for its double: the platform's own double-tap timeout (300 ms). */
         val DOUBLE_TAP_MS = ViewConfiguration.getDoubleTapTimeout().toLong()
 

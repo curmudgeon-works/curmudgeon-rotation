@@ -13,6 +13,8 @@ import app.curmudgeon.rotation.R
 import app.curmudgeon.rotation.detect.EventLog
 import app.curmudgeon.rotation.orientation.HomeChoice
 import app.curmudgeon.rotation.orientation.OrientationController
+import app.curmudgeon.rotation.orientation.OrientationMode
+import app.curmudgeon.rotation.settings.LockTapAction
 import app.curmudgeon.rotation.settings.Prefs
 import app.curmudgeon.rotation.ui.SetupActivity
 import app.curmudgeon.rotation.ui.SetupTopic
@@ -66,7 +68,15 @@ object CustomTileStore {
     fun remove(slot: Int) {
         save(cache.filterNot { it.slot == slot })
         setSlotEnabled(slot, false)
+        TilePresence.onRemoved(TilePresence.customId(slot))
     }
+
+    /** Takes the tile in [slot] out of Quick Settings, keeping the tile ([TilePresence.remove]). */
+    fun removeFromQuickSettings(slot: Int) = TilePresence.remove(
+        appContext,
+        TilePresence.customId(slot),
+        CustomTileService.component(appContext, slot),
+    ) { setSlotEnabled(slot, find(slot) != null) }
 
     fun addListener(listener: () -> Unit) = listeners.add(listener)
 
@@ -76,14 +86,20 @@ object CustomTileStore {
     fun requestUpdates(context: Context) = cache.forEach { CustomTileService.requestUpdate(context, it.slot) }
 
     /**
-     * The tile's tap: picks its target under "Rotate", remembering what was in force; when its target is already in
-     * force, goes back to what it remembered (the system default when it remembers nothing). Returns the setup screen
-     * to open instead when a permission is missing, or null when done.
+     * The tile's single or [double] tap. A Rotate choice is picked, remembering what was in force (kept while moving
+     * between this tile's own choices); when it is already in force, goes back to what was remembered (the system
+     * default when nothing is). Any other press runs its action. Returns the screen to open instead (setup when a
+     * permission is missing, or the app), or null when done.
      */
-    fun tap(context: Context, slot: Int): Intent? {
+    fun press(context: Context, slot: Int, double: Boolean): Intent? {
         val tile = find(slot) ?: return null
+        val press = (if (double) tile.doubleTap else tile.tap) ?: return null
+        val target = press.target ?: run {
+            EventLog.log("custom tile ${tile.name}: ${if (double) "double-tap" else "tap"} → $press")
+            return press.perform(context)
+        }
         val selected = OrientationController.selectedHome()
-        if (tile.target.isInForce(selected, Prefs.lockArrow)) {
+        if (target.isInForce(selected, Prefs.lockArrow)) {
             val back = tile.back
             EventLog.log("custom tile ${tile.name}: off → back to ${back?.choice ?: "system default"}")
             put(tile.copy(back = null))
@@ -97,15 +113,15 @@ object CustomTileStore {
             Prefs.lockArrow = arrow
             return setupIntent(context)
         }
-        val back = TileBack(
+        val back = tile.back?.takeIf { tile.targets.any { it.isInForce(selected, Prefs.lockArrow) } } ?: TileBack(
             selected,
             Prefs.lockArrow,
             if (selected == null && OrientationController.isSystemDefault()) OrientationController.systemRotation() else null,
         )
-        EventLog.log("custom tile ${tile.name}: on → ${tile.target}")
+        EventLog.log("custom tile ${tile.name}: on → $target")
         val arrow = Prefs.lockArrow
-        tile.target.arrow?.let { Prefs.lockArrow = it }
-        if (!OrientationController.setHome(tile.target.choice)) {
+        target.arrow?.let { Prefs.lockArrow = it }
+        if (!OrientationController.setHome(target.choice)) {
             Prefs.lockArrow = arrow
             return setupIntent(context)
         }
@@ -113,8 +129,29 @@ object CustomTileStore {
         return null
     }
 
-    /** Whether [tile]'s target is what's in force now (the tile shows as on). */
-    fun isOn(tile: CustomTile): Boolean = tile.target.isInForce(OrientationController.selectedHome(), Prefs.lockArrow)
+    /** Whether [tile] shows as on: one of its Rotate choices is in force, or one of its actions is running. */
+    fun isOn(tile: CustomTile): Boolean =
+        tile.targets.any { it.isInForce(OrientationController.selectedHome(), Prefs.lockArrow) } ||
+            listOfNotNull(tile.tap, tile.doubleTap).any { it.isRunning() }
+
+    /** A one-shot press ([TilePress.target] null): the built-in tiles' actions. */
+    private fun TilePress.perform(context: Context): Intent? = when (this) {
+        TilePress.LANDSCAPE_LOCK -> LockTapAction.LANDSCAPE.perform(context)
+        TilePress.CYCLE_LOCKS -> LockTapAction.CYCLE.perform(context)
+        TilePress.PORTRAIT_LOCK -> if (OrientationController.toggleForcedPortrait()) null else setupIntent(context)
+        else -> TileAction.entries.first { it.value == value }.perform(context)
+    }
+
+    private fun TilePress.isRunning(): Boolean = when (this) {
+        TilePress.FLIP -> OrientationController.flipPhase != null
+        TilePress.LANDSCAPE_LOCK -> OrientationController.isLandscapeForced
+        TilePress.PORTRAIT_LOCK -> OrientationController.isPortraitForced
+        TilePress.CYCLE_LOCKS -> OrientationController.isLandscapeForced || OrientationController.isPortraitForced
+        TilePress.TOGGLE_AUTO_ROTATE -> OrientationController.currentMode() == OrientationMode.AUTO
+        TilePress.TOGGLE_ORIENTATION, TilePress.CYCLE, TilePress.CYCLE_WITH_REVERSE ->
+            OrientationController.currentMode() != OrientationMode.OFF
+        else -> false
+    }
 
     private fun setupIntent(context: Context): Intent {
         val topic = if (!Permissions.canWriteSettings(context)) SetupTopic.WRITE_SETTINGS else SetupTopic.ACCESSIBILITY
@@ -163,6 +200,19 @@ fun TileTarget.labelRes(): Int = when (this) {
     TileTarget.LOCK_LEFT -> R.string.custom_tile_lock_left
     TileTarget.PORTRAIT_FLIP -> R.string.rotate_portrait_flip
     TileTarget.LANDSCAPE_FLIP -> R.string.rotate_landscape_flip
+}
+
+/** The press's short name: the tile's subtitle and the editor's row value. */
+fun TilePress.labelRes(): Int = target?.labelRes() ?: when (this) {
+    TilePress.FLIP -> R.string.press_flip
+    TilePress.LANDSCAPE_LOCK -> R.string.press_landscape_lock
+    TilePress.PORTRAIT_LOCK -> R.string.press_portrait_lock
+    TilePress.CYCLE_LOCKS -> R.string.press_cycle_locks
+    TilePress.TOGGLE_ORIENTATION -> R.string.press_toggle_orientation
+    TilePress.CYCLE -> R.string.press_cycle
+    TilePress.CYCLE_WITH_REVERSE -> R.string.press_cycle_with_reverse
+    TilePress.TOGGLE_AUTO_ROTATE -> R.string.press_toggle_auto_rotate
+    else -> R.string.press_open_app
 }
 
 /** Whether the target needs the hard lock (everything but Auto-rotate). */

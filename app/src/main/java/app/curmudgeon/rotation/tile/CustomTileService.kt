@@ -8,21 +8,32 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Icon
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import app.curmudgeon.rotation.orientation.OrientationController
 import app.curmudgeon.rotation.service.RotationService
 
 /**
- * A custom tile ([CustomTile]) in Quick Settings slot [slot]: name and icon as the user set them, tap picks its
- * target under "Rotate", tap again goes back ([CustomTileStore.tap]). Long-press opens the app, like the other tiles.
- * One subclass per slot, because each tile needs its own manifest entry.
+ * A custom tile ([CustomTile]) in Quick Settings slot [slot]: name and icon as the user set them; single and double
+ * tap do what the user picked ([CustomTileStore.press]). With a double-tap set, a tap waits for a second one, like the
+ * Rotate tile. Long-press opens the app, like the other tiles. One subclass per slot, because each tile needs its own
+ * manifest entry.
  */
 abstract class CustomTileService(private val slot: Int) : TileService() {
     // requestListeningState does nothing while the panel already shows the tile, so changes then redraw it here
     private val onChanged: () -> Unit = { updateTile() }
 
+    private val handler = Handler(Looper.getMainLooper())
+    private var pendingTap: Runnable? = null
+
+    override fun onTileAdded() = TilePresence.onAdded(TilePresence.customId(slot))
+
+    override fun onTileRemoved() = TilePresence.onRemoved(TilePresence.customId(slot))
+
     override fun onStartListening() {
+        TilePresence.onAdded(TilePresence.customId(slot))
         OrientationController.addListener(onChanged)
         CustomTileStore.addListener(onChanged)
         updateTile()
@@ -31,10 +42,34 @@ abstract class CustomTileService(private val slot: Int) : TileService() {
     override fun onStopListening() {
         OrientationController.removeListener(onChanged)
         CustomTileStore.removeListener(onChanged)
+        // the panel is going: a tap still waiting for its double runs now, before the process can be dropped
+        pendingTap?.let { tap ->
+            handler.removeCallbacks(tap)
+            tap.run()
+        }
     }
 
     override fun onClick() {
-        CustomTileStore.tap(this, slot)?.let { launch(it); return }
+        pendingTap?.let { tap ->
+            handler.removeCallbacks(tap)
+            pendingTap = null
+            run(double = true)
+            return
+        }
+        if (CustomTileStore.find(slot)?.doubleTap == null) {
+            run(double = false)
+            return
+        }
+        val tap = Runnable {
+            pendingTap = null
+            run(double = false)
+        }
+        pendingTap = tap
+        handler.postDelayed(tap, RotationTileService.DOUBLE_TAP_MS)
+    }
+
+    private fun run(double: Boolean) {
+        CustomTileStore.press(this, slot, double)?.let { launch(it); return }
         RotationService.sync(this)
         updateTile()
     }
@@ -49,7 +84,7 @@ abstract class CustomTileService(private val slot: Int) : TileService() {
         }
         tile.icon = Icon.createWithResource(this, custom.icon.drawableRes())
         tile.label = custom.name
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) tile.subtitle = getString(custom.target.labelRes())
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) tile.subtitle = getString(custom.tap.labelRes())
         tile.state = if (CustomTileStore.isOn(custom)) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
         tile.updateTile()
     }

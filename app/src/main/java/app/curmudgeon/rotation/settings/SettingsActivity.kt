@@ -57,9 +57,10 @@ class SettingsActivity : AppCompatActivity() {
         })
 
         if (savedInstanceState == null) {
-            show(R.xml.prefs_root, R.string.settings_home_title, addToBackStack = false)
-            // opened on one section (e.g. the main screen's Quick Settings tile row): on top of home, back returns home
-            SECTIONS[intent.getStringExtra(EXTRA_SECTION)]?.let { show(it.xml, it.title) }
+            // opened on one section (the main screen's Quick Settings tile row): that section alone, so back goes
+            // straight back to the main screen
+            val section = SECTIONS[intent.getStringExtra(EXTRA_SECTION)]
+            show(section?.xml ?: R.xml.prefs_root, section?.title ?: R.string.settings_home_title, addToBackStack = false)
         } else if (savedInstanceState.getBoolean(STATE_SEARCHING)) {
             // the field's text is restored after onCreate, which re-runs the search through the text listener
             binding.title.isVisible = false
@@ -128,7 +129,10 @@ class SettingsActivity : AppCompatActivity() {
         binding.searchResults.isVisible = true
     }
 
-    /** Closes search and opens the result's screen on top of home (back returns home), scrolled to the setting. */
+    /**
+     * Closes search and opens the result's screen on top of the first screen (home, or the section Settings was opened
+     * on; back returns there), scrolled to the setting.
+     */
     private fun openResult(entry: SettingsIndex.Entry) {
         closeSearch()
         supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)

@@ -199,9 +199,6 @@ To add it yourself: swipe down twice from the top of the screen, tap the pencil 
     <string name="settings_section_tile">Quick Settings tiles</string>
     <string name="settings_section_tile_summary">Rotate, Lock, Portrait, your own tiles, quick-actions notification</string>
     <!-- "Quick Settings tiles" screen: one row per tile -->
-    <string name="tiles_builtin">Built-in tiles</string>
-    <string name="tiles_custom">Your tiles</string>
-    <string name="tiles_other">Other</string>
     <string name="tile_rotate_title">Rotate tile</string>
     <string name="tile_rotate_summary">Tap: rotate once. Double-tap: Lock.</string>
     <string name="tile_lock_title">Lock tile</string>
@@ -209,7 +206,23 @@ To add it yourself: swipe down twice from the top of the screen, tap the pencil 
     <string name="tile_portrait_title">Portrait tile</string>
     <string name="tile_portrait_summary">Hard portrait lock. Tap again to go back.</string>
     <string name="add_tile">Add to Quick Settings</string>
-    <string name="add_tile_summary">Puts this tile in your Quick Settings panel.</string>
+    <string name="add_tile_summary">Ticked while the tile is in your Quick Settings panel. Untick to take it out.</string>
+    <string name="tile_single_tap">Single tap</string>
+    <string name="tile_double_tap">Double tap</string>
+    <string name="tile_long_press">Long press</string>
+    <string name="tile_long_press_summary">Opens Curmudgeon Rotation. Android decides this, so it can\'t be changed.</string>
+    <string name="tile_no_double_tap">Nothing: two taps count as two single taps</string>
+    <string name="tile_press_none">Nothing</string>
+    <!-- short names of what a custom tile's tap can do (the tile's subtitle); the Rotate choices use their own names -->
+    <string name="press_flip">Rotate once</string>
+    <string name="press_landscape_lock">Landscape lock</string>
+    <string name="press_portrait_lock">Portrait lock</string>
+    <string name="press_cycle_locks">Cycle the locks</string>
+    <string name="press_toggle_orientation">Portrait ⇄ landscape</string>
+    <string name="press_cycle">Cycle</string>
+    <string name="press_cycle_with_reverse">Cycle with reverse</string>
+    <string name="press_toggle_auto_rotate">Auto-rotate on / off</string>
+    <string name="press_open_app">Open the app</string>
     <string name="add_custom_tile">Add tile</string>
     <string name="add_custom_tile_summary">Your own name, icon and rotation.</string>
     <!-- %1$d is how many custom tiles there can be -->
@@ -221,15 +234,13 @@ To add it yourself: swipe down twice from the top of the screen, tap the pencil 
     <string name="custom_tile_name">Name</string>
     <string name="custom_tile_name_hint">For example: Reading</string>
     <string name="custom_tile_icon">Icon</string>
-    <string name="custom_tile_action">When tapped</string>
-    <string name="custom_tile_action_help">Tap the tile to pick this under Rotate. Tap again to go back to what was in force before. Everything but Auto-rotate needs the accessibility service.</string>
+    <string name="custom_tile_action_help">A Rotate choice is picked under Rotate, and tapping again goes back to what was in force before. With a double tap set, a single tap waits a moment for the second one. Everything but Auto-rotate needs the accessibility service.</string>
     <string name="custom_tile_lock_top">Lock orientation: top at the top</string>
     <string name="custom_tile_lock_right">Lock orientation: top at the right</string>
     <string name="custom_tile_lock_bottom">Lock orientation: top at the bottom</string>
     <string name="custom_tile_lock_left">Lock orientation: top at the left</string>
     <string name="custom_tile_lock_summary">Frozen in this one direction. Apps can\'t override.</string>
     <string name="custom_tile_save">Save</string>
-    <string name="custom_tile_save_and_add">Save and add to Quick Settings</string>
     <string name="custom_tile_no_name">Give the tile a name.</string>
     <string name="custom_tile_delete">Delete tile</string>
     <string name="custom_tile_delete_message">The tile is removed from Quick Settings too.</string>
@@ -270,10 +281,9 @@ To add it yourself: swipe down twice from the top of the screen, tap the pencil 
     <string name="pref_restore_summary">Put back your previous auto-rotate and rotation when a rule stops applying. Skipped if you changed rotation yourself in the meantime.</string>
     <string name="pref_tile_mechanism">Tile and notification mechanism</string>
     <string name="pref_overlay_type">Overlay type</string>
-    <string name="pref_tile_tap_action">Tile tap</string>
-    <string name="pref_lock_tap_action">Double-tap (and Lock tile tap)</string>
     <string name="lock_tap_landscape">Lock landscape; tap again to release</string>
     <string name="lock_tap_cycle">Cycle locked Landscape → Upside down → Reverse landscape → Portrait, then release</string>
+    <string name="pref_category_lock">Lock</string>
     <string name="pref_lock_release_on_turn">Lock tile: release when you turn back</string>
     <string name="pref_lock_release_on_turn_summary">After you have held the phone sideways, turning it upright ends the Lock and puts your previous rotation back. Off: Lock stays until you tap it again. Landscape lock only.</string>
     <string name="pref_quick_actions">Quick-actions notification</string>

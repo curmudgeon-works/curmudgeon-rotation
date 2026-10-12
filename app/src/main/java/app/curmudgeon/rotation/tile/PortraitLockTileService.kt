@@ -28,7 +28,12 @@ class PortraitLockTileService : TileService() {
     // requestListeningState does nothing while the panel already shows the tile, so changes then redraw it here
     private val onRotationChanged: () -> Unit = { updateTile() }
 
+    override fun onTileAdded() = TilePresence.onAdded(TilePresence.PORTRAIT)
+
+    override fun onTileRemoved() = TilePresence.onRemoved(TilePresence.PORTRAIT)
+
     override fun onStartListening() {
+        TilePresence.onAdded(TilePresence.PORTRAIT)
         OrientationController.addListener(onRotationChanged)
         updateTile()
     }
