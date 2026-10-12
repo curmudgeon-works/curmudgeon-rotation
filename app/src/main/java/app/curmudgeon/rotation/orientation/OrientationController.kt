@@ -39,6 +39,8 @@ object OrientationController {
     private var forcedWritten: SystemRotation? = null
     /** Where a cycling Lock is, or null for the plain landscape Lock (either landscape side). */
     private var forcedStep: LockStep? = null
+    /** The Lock is the "Portrait" tile's hard portrait lock rather than a landscape one. */
+    private var forcedPortrait = false
     private var forcedWatcher: TurnWatcher? = null
     private val listeners = CopyOnWriteArraySet<() -> Unit>()
 
@@ -180,7 +182,10 @@ object OrientationController {
     }
 
     /** The "Lock" tile is holding landscape (see [toggleForcedLandscape]). */
-    val isLandscapeForced: Boolean get() = forcedFrom != null
+    val isLandscapeForced: Boolean get() = forcedFrom != null && !forcedPortrait
+
+    /** The "Portrait" tile is holding portrait (see [toggleForcedPortrait]). */
+    val isPortraitForced: Boolean get() = forcedFrom != null && forcedPortrait
 
     /** Whether a hard lock can be shown right now (accessibility service running, or "Display over other apps"). */
     fun canForce(): Boolean = OverlayHost.isAvailable(appContext)
@@ -192,7 +197,8 @@ object OrientationController {
      * "Modify system settings" or no hard lock available.
      */
     fun toggleForcedLandscape(): Boolean {
-        forcedFrom?.let { start ->
+        // during the Portrait lock: switch to landscape from the same start
+        forcedFrom?.takeIf { !forcedPortrait }?.let { start ->
             if (forcedWritten?.isStillIn(systemSettings.read()) == true) { EventLog.log("lock: off → restore start"); restore(start) }
             else { EventLog.log("lock: off, rotation changed elsewhere → abandon"); abandonFlip() }
             return true
@@ -217,7 +223,7 @@ object OrientationController {
      * can't: no "Modify system settings" or no hard lock available.
      */
     fun cycleForcedLock(): Boolean {
-        val next = if (forcedFrom != null) forcedStep?.next() else LockStep.entries.first()
+        val next = if (forcedFrom != null && !forcedPortrait) forcedStep?.next() else LockStep.entries.first()
         if (next == null) {
             val start = forcedFrom!!
             if (forcedWritten?.isStillIn(systemSettings.read()) == true) restore(start) else abandonFlip()
@@ -231,6 +237,31 @@ object OrientationController {
         forcedFrom = start
         forcedWritten = locked
         forcedStep = next
+        applyOverlay()
+        notifyChanged()
+        return true
+    }
+
+    /**
+     * "Portrait" tile: locks portrait with the hard lock, so apps that insist on landscape turn upright too; the next
+     * tap puts the settings from before back. During a landscape Lock or a flip it switches to portrait, keeping their
+     * start. Returns false when it can't: no "Modify system settings" or no hard lock available.
+     */
+    fun toggleForcedPortrait(): Boolean {
+        forcedFrom?.takeIf { forcedPortrait }?.let { start ->
+            if (forcedWritten?.isStillIn(systemSettings.read()) == true) { EventLog.log("portrait: off → restore start"); restore(start) }
+            else { EventLog.log("portrait: off, rotation changed elsewhere → abandon"); abandonFlip() }
+            return true
+        }
+        if (!systemSettings.canWrite() || !canForce()) return false
+        val start = temporaryStart() ?: FlipStart(systemSettings.read(), currentMode())
+        endFlip()
+        val locked = OrientationMode.PORTRAIT.toSystemRotation(start.rotation)
+        EventLog.log("portrait: on (writing $locked; start was ${start.rotation} / ${start.mode})")
+        session.applyManual(locked)
+        forcedFrom = start
+        forcedWritten = locked
+        forcedPortrait = true
         applyOverlay()
         notifyChanged()
         return true
@@ -317,6 +348,7 @@ object OrientationController {
         forcedFrom = null
         forcedWritten = null
         forcedStep = null
+        forcedPortrait = false
     }
 
     /** Whether the screen is showing landscape right now (whoever asked for it). */
@@ -347,6 +379,7 @@ object OrientationController {
 
     private fun applyOverlay(): Boolean {
         val manual = when {
+            forcedPortrait -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             forcedFrom != null -> forcedStep?.overlayOrientation ?: ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
             flip != null ->
                 if (flip!!.toLandscape) ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT

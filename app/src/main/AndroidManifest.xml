@@ -99,6 +99,18 @@
             </intent-filter>
         </service>
 
+        <!-- third tile: hard portrait lock for apps that insist on landscape -->
+        <service
+            android:name=".tile.PortraitLockTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_rotation_portrait"
+            android:label="@string/tile_force_portrait_label"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
         <service
             android:name=".detect.AccessibilityDetectionService"
             android:exported="true"

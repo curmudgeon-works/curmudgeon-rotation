@@ -13,6 +13,7 @@ import app.curmudgeon.rotation.service.RotationService
 import app.curmudgeon.rotation.settings.PrefKeys
 import app.curmudgeon.rotation.settings.Prefs
 import app.curmudgeon.rotation.tile.LandscapeLockTileService
+import app.curmudgeon.rotation.tile.PortraitLockTileService
 import app.curmudgeon.rotation.tile.RotationTileService
 
 /** Wires the singletons together; everything runs in this one process. */
@@ -49,6 +50,7 @@ class CurmudgeonApp : Application() {
             ForegroundTracker.sync() // a flip starting or ending
             RotationTileService.requestUpdate(this)
             LandscapeLockTileService.requestUpdate(this)
+            PortraitLockTileService.requestUpdate(this)
             RotationService.sync(this) // a finished flip no longer needs the service
         }
     }
