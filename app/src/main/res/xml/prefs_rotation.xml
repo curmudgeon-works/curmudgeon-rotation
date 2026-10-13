@@ -52,5 +52,11 @@
             app:key="overlay_type"
             app:title="@string/pref_overlay_type"
             app:useSimpleSummaryProvider="true" />
+
+        <!-- moved here from the main screen's status rows: the accessibility overlay needs no permission -->
+        <Preference
+            app:iconSpaceReserved="false"
+            app:key="overlay_permission"
+            app:title="@string/pref_overlay_permission" />
     </PreferenceCategory>
 </PreferenceScreen>

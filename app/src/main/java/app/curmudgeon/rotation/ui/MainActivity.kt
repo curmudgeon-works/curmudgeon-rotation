@@ -5,9 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.Surface
-import android.view.Menu
-import android.view.MenuItem
-import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -26,8 +23,6 @@ import app.curmudgeon.rotation.service.RotationService
 import app.curmudgeon.rotation.settings.DetectionMethod
 import app.curmudgeon.rotation.settings.Prefs
 import app.curmudgeon.rotation.settings.SettingsActivity
-import app.curmudgeon.rotation.settings.TileMechanism
-import app.curmudgeon.rotation.tile.TileRequester
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -73,17 +68,6 @@ class MainActivity : AppCompatActivity() {
         RuleStore.removeListener(onChange)
         OrientationController.removeListener(onChange)
         super.onPause()
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId != R.id.action_settings) return super.onOptionsItemSelected(item)
-        startActivity(Intent(this, SettingsActivity::class.java))
-        return true
     }
 
     private fun render() {
@@ -169,26 +153,12 @@ class MainActivity : AppCompatActivity() {
     private fun renderStatus() {
         binding.statusRows.removeAllViews()
 
-        statusRow(
-            R.string.status_tile, ok = Prefs.tileAdded,
-            detail = if (Prefs.tileAdded) R.string.status_tile_ok else R.string.status_tile_missing,
-            fixLabel = R.string.status_add,
-            open = { startActivity(SettingsActivity.intent(this, "section_tile")) },
-        ) {
-            if (TileRequester.isSupported) TileRequester.request(this) { render() } else openSetup(SetupTopic.TILE)
-        }
-
         val canWrite = Permissions.canWriteSettings(this)
         statusRow(
-            R.string.status_write_settings, ok = canWrite,
-            detail = if (canWrite) R.string.status_write_settings_ok else R.string.status_write_settings_missing,
-        ) { openSetup(SetupTopic.WRITE_SETTINGS) }
-
-        val canOverlay = Permissions.canDrawOverlays(this)
-        statusRow(
-            R.string.status_overlay, ok = canOverlay,
-            detail = if (canOverlay) R.string.status_overlay_ok else R.string.status_overlay_missing,
-        ) { openSetup(SetupTopic.OVERLAY) }
+            getString(R.string.status_write_settings),
+            getString(if (canWrite) R.string.status_write_settings_ok else R.string.status_write_settings_missing),
+            fix = if (canWrite) null else ({ openSetup(SetupTopic.WRITE_SETTINGS) }),
+        )
 
         when (Prefs.detectionMethod) {
             DetectionMethod.ACCESSIBILITY -> {
@@ -198,7 +168,7 @@ class MainActivity : AppCompatActivity() {
                     Permissions.isAccessibilityServiceEnabled(this) -> R.string.status_accessibility_starting
                     else -> R.string.status_accessibility_missing
                 }
-                statusRow(R.string.status_detection_accessibility, ok = connected, detail = detail) {
+                statusRow(getString(R.string.status_detection_accessibility), getString(detail), checked = connected) {
                     openSetup(SetupTopic.ACCESSIBILITY)
                 }
             }
@@ -210,29 +180,36 @@ class MainActivity : AppCompatActivity() {
                     access -> R.string.status_usage_not_running
                     else -> R.string.status_usage_missing
                 }
-                statusRow(R.string.status_detection_usage, ok = running, detail = detail) {
+                statusRow(getString(R.string.status_detection_usage), getString(detail), checked = running) {
                     if (access) RotationService.sync(this) else openSetup(SetupTopic.USAGE_ACCESS)
                     render()
                 }
             }
         }
+
+        statusRow(getString(R.string.settings_title), getString(R.string.status_settings_summary)) {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
+        statusRow(getString(R.string.status_tiles), getString(R.string.settings_section_tile_summary)) {
+            startActivity(SettingsActivity.intent(this, "section_tile"))
+        }
     }
 
+    /** One row: a [fix] button when given, a state-only checkbox on the right when [checked] is given, tappable when [open] is given. */
     private fun statusRow(
-        @StringRes title: Int,
-        ok: Boolean,
-        @StringRes detail: Int,
-        @StringRes fixLabel: Int = R.string.status_fix,
+        title: String,
+        detail: String,
+        checked: Boolean? = null,
+        fix: (() -> Unit)? = null,
         open: (() -> Unit)? = null,
-        fix: () -> Unit,
     ) {
         val row = ItemStatusRowBinding.inflate(layoutInflater, binding.statusRows, true)
-        row.statusTitle.setText(title)
-        row.statusDetail.setText(detail)
-        row.statusIndicator.setImageResource(if (ok) R.drawable.ic_status_ok else R.drawable.ic_status_missing)
-        row.statusFix.isVisible = !ok
-        row.statusFix.setText(fixLabel)
-        row.statusFix.setOnClickListener { fix() }
+        row.statusTitle.text = title
+        row.statusDetail.text = detail
+        row.statusFix.isVisible = fix != null
+        row.statusFix.setOnClickListener { fix?.invoke() }
+        row.statusCheck.isVisible = checked != null
+        row.statusCheck.isChecked = checked == true
         if (open != null) {
             row.root.setBackgroundResource(TypedValue().also { theme.resolveAttribute(android.R.attr.selectableItemBackground, it, true) }.resourceId)
             row.root.setOnClickListener { open() }

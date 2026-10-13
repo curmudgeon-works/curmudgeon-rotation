@@ -94,6 +94,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
             offerOverlaySetup(value == OverlayType.ACCESSIBILITY.value)
             true
         }
+        onClick(PrefKeys.OVERLAY_PERMISSION) { openSetup(SetupTopic.OVERLAY) }
         find<ListPreference>(PrefKeys.TILE_MECHANISM)?.setOnPreferenceChangeListener { _, value ->
             if (value == TileMechanism.OVERLAY.value && !OverlayHost.isAvailable(requireContext())) {
                 offerOverlaySetup(Prefs.overlayType == OverlayType.ACCESSIBILITY)
@@ -153,6 +154,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
         renderCustomTiles()
         // a tile may have been added or taken out in Quick Settings meanwhile
         BUILT_IN_TILES.forEach { find<QsTilePreference>(it.key)?.added = TilePresence.isAdded(it.id) }
+        find<Preference>(PrefKeys.OVERLAY_PERMISSION)?.setSummary(
+            if (Permissions.canDrawOverlays(requireContext())) R.string.pref_overlay_permission_ok else R.string.pref_overlay_permission_missing,
+        )
     }
 
     /** One row per custom tile, between the built-in tiles and "Add tile", on the "Quick Settings tiles" screen only. */

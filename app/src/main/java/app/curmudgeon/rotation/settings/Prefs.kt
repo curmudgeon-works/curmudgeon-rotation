@@ -19,6 +19,7 @@ object PrefKeys {
     const val LOCK_RELEASE_ON_TURN = "lock_release_on_turn"
     const val TILE_MECHANISM = "tile_mechanism"
     const val OVERLAY_TYPE = "overlay_type"
+    const val OVERLAY_PERMISSION = "overlay_permission"
     const val IGNORE_LAUNCHER = "ignore_launcher"
     const val IGNORE_LAUNCHER_TILES = "ignore_launcher_tiles"
     const val IGNORE_LAUNCHER_ROTATE = "ignore_launcher_rotate"
