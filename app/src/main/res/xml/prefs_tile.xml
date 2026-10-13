@@ -1,32 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- SPDX-License-Identifier: GPL-3.0-only -->
-<!-- "Quick Settings tiles": one row per tile, no groups. Built-in tiles can't be changed: one "in Quick Settings" checkbox
-     row each, the summary says what the tile does (other actions live on custom tiles). Custom tile rows are added in
+<!-- "Quick Settings tiles": one row per tile, no groups, under an "Add to Quick Settings" heading over the rows' radio
+     buttons (QsTilePreference). Built-in tiles can't be changed: the summary says what the tile does (other actions live on custom tiles). Custom tile rows are added in
      code (SettingsFragment, order 100 + slot) and open TileEditorActivity.
      The quick-actions notification sits below a divider. Defaults must match Prefs.kt.
      Which keys show in Simple mode: SimpleModeFilter.SIMPLE_KEYS. -->
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <CheckBoxPreference
+    <Preference
+        app:key="tiles_header"
+        app:layout="@layout/pref_qs_header"
+        app:order="-1"
+        app:selectable="false" />
+
+    <app.curmudgeon.rotation.settings.QsTilePreference
         app:icon="@drawable/ic_rotation_auto"
         app:key="add_tile_rotate"
-        app:persistent="false"
         app:order="0"
         app:summary="@string/tile_rotate_summary"
         app:title="@string/tile_label" />
 
-    <CheckBoxPreference
+    <app.curmudgeon.rotation.settings.QsTilePreference
         app:icon="@drawable/ic_rotation_landscape"
         app:key="add_tile_lock"
-        app:persistent="false"
         app:order="1"
         app:summary="@string/tile_lock_summary"
         app:title="@string/tile_force_landscape_label" />
 
-    <CheckBoxPreference
+    <app.curmudgeon.rotation.settings.QsTilePreference
         app:icon="@drawable/ic_rotation_portrait"
         app:key="add_tile_portrait"
-        app:persistent="false"
         app:order="2"
         app:summary="@string/tile_portrait_summary"
         app:title="@string/tile_force_portrait_label" />

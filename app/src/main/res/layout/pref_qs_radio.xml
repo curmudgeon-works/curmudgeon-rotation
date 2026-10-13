@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+<!-- Widget on tile rows (QsTilePreference): whether the tile is in Quick Settings. Sits under the "Add to Quick Settings"
+     column heading (pref_qs_header). -->
+<RadioButton xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/qsRadio"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:contentDescription="@string/add_tile" />

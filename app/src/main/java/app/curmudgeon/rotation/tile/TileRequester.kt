@@ -39,6 +39,16 @@ object TileRequester {
         }
     }
 
+    /** Before asking Android to add a tile: once added, only the Quick Settings panel can take it out. */
+    fun confirmAdding(context: Context, onAdd: () -> Unit) {
+        AlertDialog.Builder(context)
+            .setTitle(R.string.add_tile_confirm_title)
+            .setMessage(R.string.add_tile_confirm_body)
+            .setNegativeButton(android.R.string.cancel, null)
+            .setPositiveButton(R.string.add_tile_confirm) { _, _ -> onAdd() }
+            .show()
+    }
+
     /** Android has no way for an app to take a tile out of Quick Settings: says how to do it by hand. */
     fun explainRemoving(context: Context) {
         AlertDialog.Builder(context)

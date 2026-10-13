@@ -26,6 +26,7 @@ object PrefKeys {
     const val DEBOUNCE_MS = "debounce_ms"
     const val POLL_INTERVAL_MS = "poll_interval_ms"
     const val QUICK_ACTIONS_NOTIFICATION = "quick_actions_notification"
+    const val TILES_HEADER = "tiles_header"
     const val ADD_TILE_ROTATE = "add_tile_rotate"
     const val ADD_TILE_LOCK = "add_tile_lock"
     const val ADD_TILE_PORTRAIT = "add_tile_portrait"

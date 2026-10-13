@@ -10,6 +10,7 @@ object SimpleModeFilter {
         PrefKeys.DETECTION_METHOD,
         PrefKeys.RESTORE_ON_LEAVE,
         PrefKeys.LOCK_RELEASE_ON_TURN,
+        PrefKeys.TILES_HEADER,
         PrefKeys.ADD_TILE_ROTATE,
         PrefKeys.ADD_TILE_LOCK,
         PrefKeys.ADD_TILE_PORTRAIT,

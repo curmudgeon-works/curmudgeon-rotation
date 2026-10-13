@@ -18,7 +18,6 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.annotation.XmlRes
 import androidx.appcompat.app.AlertDialog
-import androidx.preference.CheckBoxPreference
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
@@ -30,6 +29,7 @@ import app.curmudgeon.rotation.detect.RecentActivityLog
 import app.curmudgeon.rotation.orientation.OverlayHost
 import app.curmudgeon.rotation.rules.RuleJson
 import app.curmudgeon.rotation.rules.RuleStore
+import app.curmudgeon.rotation.tile.CustomTileService
 import app.curmudgeon.rotation.tile.CustomTileSlots
 import app.curmudgeon.rotation.tile.CustomTileStore
 import app.curmudgeon.rotation.tile.LandscapeLockTileService
@@ -110,9 +110,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
 
         BUILT_IN_TILES.forEach { builtIn ->
-            find<CheckBoxPreference>(builtIn.key)?.setOnPreferenceChangeListener { preference, value ->
-                setAdded(builtIn, preference as CheckBoxPreference, value == true)
-                false // the box follows what actually happened (set in setAdded)
+            find<QsTilePreference>(builtIn.key)?.let { row ->
+                row.onRadio = { onRadio(row, builtIn.id, builtIn.component(requireContext()), getString(builtIn.label), builtIn.icon) }
+                row.setOnPreferenceClickListener { row.onRadio(); true }
             }
         }
         onClick(PrefKeys.ADD_CUSTOM_TILE) {
@@ -152,7 +152,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         super.onResume()
         renderCustomTiles()
         // a tile may have been added or taken out in Quick Settings meanwhile
-        BUILT_IN_TILES.forEach { find<CheckBoxPreference>(it.key)?.isChecked = TilePresence.isAdded(it.id) }
+        BUILT_IN_TILES.forEach { find<QsTilePreference>(it.key)?.added = TilePresence.isAdded(it.id) }
     }
 
     /** One row per custom tile, between the built-in tiles and "Add tile", on the "Quick Settings tiles" screen only. */
@@ -162,13 +162,16 @@ class SettingsFragment : PreferenceFragmentCompat() {
             .filter { it.key?.startsWith(PrefKeys.CUSTOM_TILE_PREFIX) == true }
             .forEach(screen::removePreference)
         CustomTileStore.all().forEach { tile ->
-            screen.addPreference(Preference(requireContext()).apply {
+            screen.addPreference(QsTilePreference(requireContext()).apply {
                 key = PrefKeys.CUSTOM_TILE_PREFIX + tile.slot
                 order = CUSTOM_TILE_ORDER + tile.slot
                 title = tile.name
                 summary = getString(tile.tap.labelRes())
                 setIcon(tile.icon.drawableRes())
-                widgetLayoutResource = R.layout.pref_chevron
+                added = TilePresence.isAdded(TilePresence.customId(tile.slot))
+                onRadio = {
+                    onRadio(this, TilePresence.customId(tile.slot), CustomTileService.component(requireContext(), tile.slot), tile.name, tile.icon.drawableRes())
+                }
                 setOnPreferenceClickListener {
                     startActivity(TileEditorActivity.intent(requireContext(), tile.slot))
                     true
@@ -178,26 +181,27 @@ class SettingsFragment : PreferenceFragmentCompat() {
     }
 
     /**
-     * A built-in tile's "Add to Quick Settings" box. Ticked: the system "Add tile?" prompt (Android 13+; older versions
-     * get the how-to screen). Unticked: says how to take it out by hand, since no app can; the box clears when that
-     * happens.
+     * A tile row's radio button. Off: warns that only the panel can take the tile out again, then the system "Add tile?"
+     * prompt (Android 13+; older versions get the how-to screen). On: says how to take it out in the panel.
      */
-    private fun setAdded(builtIn: BuiltInTile, box: CheckBoxPreference, added: Boolean) {
-        if (!added) {
+    private fun onRadio(row: QsTilePreference, id: String, component: ComponentName, label: String, @DrawableRes icon: Int) {
+        if (row.added) {
             TileRequester.explainRemoving(requireContext())
             return
         }
-        if (!TileRequester.isSupported) {
-            openSetup(SetupTopic.TILE)
-            return
-        }
-        TileRequester.request(requireContext(), builtIn.component(requireContext()), getString(builtIn.label), builtIn.icon) { done ->
-            if (done) TilePresence.onAdded(builtIn.id)
-            box.isChecked = done
+        TileRequester.confirmAdding(requireContext()) {
+            if (!TileRequester.isSupported) {
+                openSetup(SetupTopic.TILE)
+                return@confirmAdding
+            }
+            TileRequester.request(requireContext(), component, label, icon) { done ->
+                if (done) TilePresence.onAdded(id)
+                row.added = done
+            }
         }
     }
 
-    /** A built-in tile's "Add to Quick Settings" box ([key]) and what the tile is. */
+    /** A built-in tile's row ([key]) and what the tile is. */
     private class BuiltInTile(
         val key: String,
         val id: String,

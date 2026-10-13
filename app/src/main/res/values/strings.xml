@@ -205,9 +205,12 @@ To add it yourself: swipe down twice from the top of the screen, tap the pencil 
     <string name="tile_lock_summary">Tap: lock landscape, even in apps that insist on portrait. Tap again to release. Long press: opens this app.</string>
     <string name="tile_portrait_summary">Tap: lock portrait, even in apps that insist on landscape. Tap again to release. Long press: opens this app.</string>
     <string name="add_tile">Add to Quick Settings</string>
+    <string name="add_tile_confirm_title">Add to Quick Settings?</string>
+    <string name="add_tile_confirm_body">Once it\'s added, this app can\'t take it out again. To remove it later, use the Quick Settings panel: swipe down twice from the top of the screen, tap the pencil (edit) icon, and drag the tile out.</string>
+    <string name="add_tile_confirm">Add</string>
     <string name="remove_tile_title">Remove it in Quick Settings</string>
-    <string name="remove_tile_body">Android doesn\'t let apps take tiles out of Quick Settings. To remove this one: swipe down twice from the top of the screen, tap the pencil (edit) icon, and drag the tile out of your active tiles. The box clears once it\'s gone.</string>
-    <string name="add_tile_summary">Ticked while the tile is in your Quick Settings panel.</string>
+    <string name="remove_tile_body">Android doesn\'t let apps take tiles out of Quick Settings. To remove this one: swipe down twice from the top of the screen, tap the pencil (edit) icon, and drag the tile out of your active tiles. The button clears once it\'s gone.</string>
+    <string name="add_tile_summary">On while the tile is in your Quick Settings panel. Only the panel can take it out.</string>
     <string name="tile_single_tap">Single tap</string>
     <string name="tile_double_tap">Double tap</string>
     <string name="tile_long_press">Long press</string>

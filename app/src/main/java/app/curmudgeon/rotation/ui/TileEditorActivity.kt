@@ -67,7 +67,7 @@ class TileEditorActivity : AppCompatActivity() {
         if (existing == null) supportActionBar?.setTitle(R.string.custom_tile_new_title)
 
         buildIconGrid()
-        binding.addedRow.setOnClickListener { setAdded(!binding.addedBox.isChecked) }
+        binding.addedRow.setOnClickListener { onAddedTapped() }
         binding.tapRow.setOnClickListener {
             pickPress(R.string.tile_single_tap, TilePress.entries, tap) { tap = it ?: tap }
         }
@@ -176,22 +176,25 @@ class TileEditorActivity : AppCompatActivity() {
     }
 
     /**
-     * Ticked: saves the tile (it must exist to be added) and asks Android to add it (Android 13+; older versions get
-     * the how-to screen). Unticked: says how to take it out by hand, since no app can; the box clears when that happens.
+     * The "Add to Quick Settings" radio button. Off: warns that only the panel can take the tile out again, saves the
+     * tile (it must exist to be added) and asks Android to add it (Android 13+; older versions get the how-to screen).
+     * On: says how to take it out in the panel; the button clears when that happens.
      */
-    private fun setAdded(added: Boolean) {
-        if (!added) {
+    private fun onAddedTapped() {
+        if (binding.addedBox.isChecked) {
             TileRequester.explainRemoving(this)
             return
         }
-        if (!save()) return
-        if (!TileRequester.isSupported) {
-            startActivity(SetupActivity.intent(this, SetupTopic.TILE))
-            return
-        }
-        TileRequester.request(this, CustomTileService.component(this, slot), binding.nameField.text.toString().trim(), icon.drawableRes()) { done ->
-            if (done) TilePresence.onAdded(TilePresence.customId(slot))
-            binding.addedBox.isChecked = done
+        TileRequester.confirmAdding(this) {
+            if (!save()) return@confirmAdding
+            if (!TileRequester.isSupported) {
+                startActivity(SetupActivity.intent(this, SetupTopic.TILE))
+                return@confirmAdding
+            }
+            TileRequester.request(this, CustomTileService.component(this, slot), binding.nameField.text.toString().trim(), icon.drawableRes()) { done ->
+                if (done) TilePresence.onAdded(TilePresence.customId(slot))
+                binding.addedBox.isChecked = done
+            }
         }
     }
 
