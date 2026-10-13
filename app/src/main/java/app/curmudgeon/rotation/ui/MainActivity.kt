@@ -73,10 +73,7 @@ class MainActivity : AppCompatActivity() {
     private fun render() {
         renderRotate()
         renderStatus()
-        val rules = RuleStore.all()
-        rulesAdapter.submitList(rules)
-        val count = resources.getQuantityString(R.plurals.rotate_rules_count, rules.size, rules.size)
-        binding.rulesSummary.text = getString(if (Prefs.rulesWin) R.string.rotate_rules_on else R.string.rotate_rules_off, count)
+        rulesAdapter.submitList(RuleStore.all())
         binding.rulesBody.isVisible = Prefs.rulesUnfolded
         binding.rulesFold.rotation = if (Prefs.rulesUnfolded) 270f else 90f
     }

@@ -82,15 +82,7 @@
     <string name="rotate_direction_right">right</string>
     <string name="rotate_direction_bottom">bottom</string>
     <string name="rotate_direction_left">left</string>
-    <string name="rotate_rules">Per-app rules</string>
-    <string name="rotate_rules_win">Per-app rules win</string>
-    <!-- %1$s is rotate_rules_count -->
-    <string name="rotate_rules_on">%1$s Checked: their rules win over the choice above.</string>
-    <string name="rotate_rules_off">%1$s Unchecked: rules are ignored and the choice above applies everywhere.</string>
-    <plurals name="rotate_rules_count">
-        <item quantity="one">1 app.</item>
-        <item quantity="other">%d apps.</item>
-    </plurals>
+    <string name="rotate_rules_win">Per-app rules override above choice</string>
     <!-- the line above the choices: what holds rotation right now -->
     <string name="rotate_now">Now: %1$s</string>
     <string name="rotate_now_tile">%1$s tile, %2$s. Tap the tile again to go back, or pick below.</string>
