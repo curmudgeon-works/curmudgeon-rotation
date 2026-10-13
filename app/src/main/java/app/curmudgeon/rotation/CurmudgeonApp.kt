@@ -16,7 +16,6 @@ import app.curmudgeon.rotation.tile.CustomTileStore
 import app.curmudgeon.rotation.tile.LandscapeLockTileService
 import app.curmudgeon.rotation.tile.PortraitLockTileService
 import app.curmudgeon.rotation.tile.RotationTileService
-import app.curmudgeon.rotation.tile.TilePresence
 
 /** Wires the singletons together; everything runs in this one process. */
 class CurmudgeonApp : Application() {
@@ -42,7 +41,6 @@ class CurmudgeonApp : Application() {
         Prefs.init(this)
         RuleStore.init(Prefs.state)
         CustomTileStore.init(this, Prefs.state)
-        TilePresence.restoreBuiltIns(this)
         RecentActivityLog.init(Prefs.state)
         EventLog.init(Prefs.state)
         OrientationController.init(this)

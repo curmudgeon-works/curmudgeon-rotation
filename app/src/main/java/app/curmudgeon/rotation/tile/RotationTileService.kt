@@ -121,7 +121,7 @@ class RotationTileService : TileService() {
             tile.state = Tile.STATE_INACTIVE
             setLabels(tile, getString(R.string.tile_needs_setup))
         }
-        tile.updateTile()
+        tile.updateSafely()
     }
 
     /** Subtitles exist from Android 10; before that the state goes into the label. */

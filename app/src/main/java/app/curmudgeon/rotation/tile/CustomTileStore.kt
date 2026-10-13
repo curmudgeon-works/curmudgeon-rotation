@@ -71,13 +71,6 @@ object CustomTileStore {
         TilePresence.onRemoved(TilePresence.customId(slot))
     }
 
-    /** Takes the tile in [slot] out of Quick Settings, keeping the tile ([TilePresence.remove]). */
-    fun removeFromQuickSettings(slot: Int) = TilePresence.remove(
-        appContext,
-        TilePresence.customId(slot),
-        CustomTileService.component(appContext, slot),
-    ) { setSlotEnabled(slot, find(slot) != null) }
-
     fun addListener(listener: () -> Unit) = listeners.add(listener)
 
     fun removeListener(listener: () -> Unit) = listeners.remove(listener)

@@ -62,7 +62,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(requireArguments().getInt(ARG_XML), rootKey)
-        (SettingsActivity.SECTIONS.keys + SettingsActivity.TILE_SCREENS.keys).forEach { key ->
+        SettingsActivity.SECTIONS.keys.forEach { key ->
             find<Preference>(key)?.widgetLayoutResource = R.layout.pref_chevron
         }
 
@@ -179,21 +179,19 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     /**
      * A built-in tile's "Add to Quick Settings" box. Ticked: the system "Add tile?" prompt (Android 13+; older versions
-     * get the how-to screen). Unticked: takes the tile out of Quick Settings.
+     * get the how-to screen). Unticked: says how to take it out by hand, since no app can; the box clears when that
+     * happens.
      */
     private fun setAdded(builtIn: BuiltInTile, box: CheckBoxPreference, added: Boolean) {
-        val context = requireContext().applicationContext
-        val component = builtIn.component(context)
         if (!added) {
-            TilePresence.remove(context, builtIn.id, component) { TilePresence.restoreBuiltIn(context, component) }
-            box.isChecked = false
+            TileRequester.explainRemoving(requireContext())
             return
         }
         if (!TileRequester.isSupported) {
             openSetup(SetupTopic.TILE)
             return
         }
-        TileRequester.request(requireContext(), component, getString(builtIn.label), builtIn.icon) { done ->
+        TileRequester.request(requireContext(), builtIn.component(requireContext()), getString(builtIn.label), builtIn.icon) { done ->
             if (done) TilePresence.onAdded(builtIn.id)
             box.isChecked = done
         }
@@ -214,7 +212,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
     }
 
     override fun onPreferenceTreeClick(preference: Preference): Boolean {
-        val section = SettingsActivity.SECTIONS[preference.key] ?: SettingsActivity.TILE_SCREENS[preference.key]
+        val section = SettingsActivity.SECTIONS[preference.key]
         val activity = activity as? SettingsActivity
         if (section == null || activity == null) return super.onPreferenceTreeClick(preference)
         activity.show(section.xml, section.title)

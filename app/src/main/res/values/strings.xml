@@ -126,15 +126,17 @@
     <string name="setup_done">Done</string>
     <string name="setup_status_done">✓ Allowed. You\'re all set.</string>
     <string name="setup_status_missing">Not allowed yet.</string>
+    <string name="setup_status_accessibility_stopped">Switched on, but Android has stopped it. This happens when the app crashes. Switch it off and on again on the next screen.</string>
+    <string name="setup_accessibility_open">Open accessibility settings</string>
     <string name="setup_open_app_info">Toggle greyed out? Open app info</string>
     <string name="setup_write_settings_title">Allow changing rotation</string>
     <string name="setup_write_settings_body">Rotation lock and the locked rotation are system settings. To change them from the Quick Settings tile or a per-app rule, Android requires the \"Modify system settings\" permission.\n\nCurmudgeon Rotation only writes two settings: auto-rotate on/off and the locked rotation. It remembers your previous values and puts them back when a rule ends.\n\nOn the next screen, switch on \"Allow modifying system settings\", then come back.</string>
     <string name="setup_overlay_title">Allow the orientation overlay</string>
     <string name="setup_overlay_body">Some apps lock their own orientation (for example HBO Max stays portrait even with auto-rotate on). Changing system settings can\'t override that.\n\nThe \"force\" options add an invisible, zero-size window that asks Android for an orientation. It draws nothing and can\'t be touched.\n\nThat window can come from the accessibility service (no extra permission) or from \"Display over other apps\". Allow it on the next screen if you want to use app overlays or force rotation from the tile without the accessibility service.\n\nNote: on Android 12 and newer, apps can hide app overlays while they are open, so forcing may not work in every app. The accessibility overlay is not affected by that.</string>
-    <string name="setup_accessibility_title">Per-app rules: accessibility service</string>
+    <string name="setup_accessibility_title">Accessibility service</string>
     <string name="setup_accessibility_body">To switch rotation when you open a specific app, Curmudgeon Rotation needs to know which app is in front. Android provides this through an accessibility service.\n\nWhat it reads: only which app and screen is in front (the package name and the screen\'s class name, for example com.google.android.youtube).\n\nWhat it does not read: window content, text you type or see, passwords, notifications or gestures.\n\nWhen: only while you have at least one per-app rule, while a Flip is waiting for you to turn the phone, or while a tile or Rotate choice is set to be lifted on the home screen ("Ignore launcher" off). Otherwise Android does not tell the app anything.\n\nWhat happens to it: it is used on your device to pick a rule. For apps you have a rule for, a short list of recently seen screens is kept in the app\'s private storage so you can limit rules to specific screens; you can view and clear it in settings. Nothing is transmitted. The app has no internet permission.\n\nThe same service also holds the invisible overlay window used by the Lock and Portrait tiles and the \"force\" rules, which is what turns apps that insist on portrait (like HBO Max) into landscape.\n\nOn the next screen, find \"Curmudgeon Rotation\" under installed or downloaded apps and switch it on.\n\nIf the switch is greyed out (\"Restricted setting\"), Android is blocking it because the app was not installed from a store: open app info, tap the ⋮ menu, choose \"Allow restricted settings\", then try again.</string>
     <string name="setup_accessibility_agree">I agree, open accessibility settings</string>
-    <string name="setup_usage_title">Per-app rules: usage access</string>
+    <string name="setup_usage_title">Usage access</string>
     <string name="setup_usage_body">An alternative to the accessibility service. With usage access, Curmudgeon Rotation checks which app was opened most recently, once per poll interval (default 1 second), only while the screen is on.\n\nIt reacts a little slower than the accessibility service and needs a small ongoing notification so Android keeps it running.\n\nThe usage data is read on your device only to pick a rule. Nothing is transmitted. The app has no internet permission.\n\nOn the next screen, choose Curmudgeon Rotation and switch on \"Permit usage access\".</string>
     <string name="setup_tile_title">Add the Quick Settings tile</string>
     <string name="setup_tile_body">Tap to rotate once: the screen turns to the other orientation, follows the phone while you hold it that way, and your previous rotation setting returns when you turn it back. Double-tap to lock landscape even in apps that insist on portrait (like HBO Max); double-tap again to release. Both can be changed in Settings → Quick Settings tiles. Press and hold opens this app.
@@ -199,19 +201,17 @@ To add it yourself: swipe down twice from the top of the screen, tap the pencil 
     <string name="settings_section_tile">Quick Settings tiles</string>
     <string name="settings_section_tile_summary">Rotate, Lock, Portrait, your own tiles, quick-actions notification</string>
     <!-- "Quick Settings tiles" screen: one row per tile -->
-    <string name="tile_rotate_title">Rotate tile</string>
-    <string name="tile_rotate_summary">Tap: rotate once. Double-tap: Lock.</string>
-    <string name="tile_lock_title">Lock tile</string>
-    <string name="tile_lock_summary">Hard landscape lock. Tap again to go back.</string>
-    <string name="tile_portrait_title">Portrait tile</string>
-    <string name="tile_portrait_summary">Hard portrait lock. Tap again to go back.</string>
+    <string name="tile_rotate_summary">Tap: rotate once. Double tap: lock landscape. Long press: opens this app.</string>
+    <string name="tile_lock_summary">Tap: lock landscape, even in apps that insist on portrait. Tap again to release. Long press: opens this app.</string>
+    <string name="tile_portrait_summary">Tap: lock portrait, even in apps that insist on landscape. Tap again to release. Long press: opens this app.</string>
     <string name="add_tile">Add to Quick Settings</string>
-    <string name="add_tile_summary">Ticked while the tile is in your Quick Settings panel. Untick to take it out.</string>
+    <string name="remove_tile_title">Remove it in Quick Settings</string>
+    <string name="remove_tile_body">Android doesn\'t let apps take tiles out of Quick Settings. To remove this one: swipe down twice from the top of the screen, tap the pencil (edit) icon, and drag the tile out of your active tiles. The box clears once it\'s gone.</string>
+    <string name="add_tile_summary">Ticked while the tile is in your Quick Settings panel.</string>
     <string name="tile_single_tap">Single tap</string>
     <string name="tile_double_tap">Double tap</string>
     <string name="tile_long_press">Long press</string>
     <string name="tile_long_press_summary">Opens Curmudgeon Rotation. Android decides this, so it can\'t be changed.</string>
-    <string name="tile_no_double_tap">Nothing: two taps count as two single taps</string>
     <string name="tile_press_none">Nothing</string>
     <!-- short names of what a custom tile's tap can do (the tile's subtitle); the Rotate choices use their own names -->
     <string name="press_flip">Rotate once</string>

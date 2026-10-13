@@ -30,7 +30,6 @@ object SettingsIndex {
         val out = mutableListOf<Entry>()
         read(context, R.xml.prefs_root, context.getString(R.string.settings_home_title), out, skipSectionRows = true)
         SettingsActivity.SECTIONS.values.forEach { section -> read(context, section.xml, context.getString(section.title), out, skipSectionRows = false) }
-        SettingsActivity.TILE_SCREENS.values.forEach { screen -> read(context, screen.xml, context.getString(screen.title), out, skipSectionRows = false) }
         return out
     }
 

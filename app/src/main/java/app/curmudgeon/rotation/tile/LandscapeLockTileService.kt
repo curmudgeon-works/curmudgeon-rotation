@@ -56,7 +56,7 @@ class LandscapeLockTileService : TileService() {
         tile.icon = Icon.createWithResource(this, R.drawable.ic_rotation_landscape)
         tile.label = getString(R.string.tile_force_landscape_label)
         tile.state = if (OrientationController.isLandscapeForced) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
-        tile.updateTile()
+        tile.updateSafely()
     }
 
     @SuppressLint("StartActivityAndCollapseDeprecated")

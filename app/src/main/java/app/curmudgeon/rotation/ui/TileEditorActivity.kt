@@ -177,12 +177,11 @@ class TileEditorActivity : AppCompatActivity() {
 
     /**
      * Ticked: saves the tile (it must exist to be added) and asks Android to add it (Android 13+; older versions get
-     * the how-to screen). Unticked: takes it out of Quick Settings, keeping the tile.
+     * the how-to screen). Unticked: says how to take it out by hand, since no app can; the box clears when that happens.
      */
     private fun setAdded(added: Boolean) {
         if (!added) {
-            if (existing != null) CustomTileStore.removeFromQuickSettings(slot)
-            binding.addedBox.isChecked = false
+            TileRequester.explainRemoving(this)
             return
         }
         if (!save()) return

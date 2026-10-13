@@ -79,14 +79,14 @@ abstract class CustomTileService(private val slot: Int) : TileService() {
         val custom = CustomTileStore.find(slot)
         if (custom == null) {
             tile.state = Tile.STATE_UNAVAILABLE
-            tile.updateTile()
+            tile.updateSafely()
             return
         }
         tile.icon = Icon.createWithResource(this, custom.icon.drawableRes())
         tile.label = custom.name
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) tile.subtitle = getString(custom.tap.labelRes())
         tile.state = if (CustomTileStore.isOn(custom)) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
-        tile.updateTile()
+        tile.updateSafely()
     }
 
     @SuppressLint("StartActivityAndCollapseDeprecated")

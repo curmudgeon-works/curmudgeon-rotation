@@ -27,14 +27,7 @@ class SettingsXmlTest {
         "section_rules" to "prefs_rules",
     )
 
-    /** Screens opened from rows on a section screen (the built-in tiles under "Quick Settings tiles"). */
-    private val subscreens = mapOf(
-        "tile_rotate" to "prefs_tile_rotate",
-        "tile_lock" to "prefs_tile_lock",
-        "tile_portrait" to "prefs_tile_portrait",
-    )
-
-    private val screens get() = sections.values + subscreens.values
+    private val screens get() = sections.values
 
     @Test
     fun homeListsEverySectionThenAbout() {

@@ -136,7 +136,7 @@ class SettingsActivity : AppCompatActivity() {
     private fun openResult(entry: SettingsIndex.Entry) {
         closeSearch()
         supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-        val section = (SECTIONS.values + TILE_SCREENS.values).firstOrNull { it.xml == entry.sectionXml }
+        val section = SECTIONS.values.firstOrNull { it.xml == entry.sectionXml }
         if (section == null) {
             show(R.xml.prefs_root, R.string.settings_home_title, addToBackStack = false, focusKey = entry.key)
         } else {
@@ -160,11 +160,5 @@ class SettingsActivity : AppCompatActivity() {
             "section_rules" to Section(R.xml.prefs_rules, R.string.settings_section_rules),
         )
 
-        /** Row on the "Quick Settings tiles" screen -> that built-in tile's screen. Keys must match res/xml/prefs_tile.xml. */
-        val TILE_SCREENS = linkedMapOf(
-            PrefKeys.TILE_ROTATE to Section(R.xml.prefs_tile_rotate, R.string.tile_rotate_title),
-            PrefKeys.TILE_LOCK to Section(R.xml.prefs_tile_lock, R.string.tile_lock_title),
-            PrefKeys.TILE_PORTRAIT to Section(R.xml.prefs_tile_portrait, R.string.tile_portrait_title),
-        )
     }
 }

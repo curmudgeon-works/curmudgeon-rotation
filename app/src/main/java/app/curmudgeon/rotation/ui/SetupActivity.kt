@@ -10,6 +10,7 @@ import androidx.core.view.isVisible
 import app.curmudgeon.rotation.Permissions
 import app.curmudgeon.rotation.R
 import app.curmudgeon.rotation.databinding.ActivitySetupBinding
+import app.curmudgeon.rotation.detect.AccessibilityDetectionService
 import app.curmudgeon.rotation.orientation.OrientationController
 import app.curmudgeon.rotation.service.RotationService
 import app.curmudgeon.rotation.settings.Prefs
@@ -59,9 +60,22 @@ class SetupActivity : AppCompatActivity() {
             OrientationController.refresh()
             RotationService.sync(this)
         }
-        binding.setupStatus.setText(if (done) R.string.setup_status_done else R.string.setup_status_missing)
+        val stopped = !done && topic == SetupTopic.ACCESSIBILITY && Permissions.isAccessibilityServiceEnabled(this)
+        binding.setupStatus.setText(
+            when {
+                done -> R.string.setup_status_done
+                stopped -> R.string.setup_status_accessibility_stopped
+                else -> R.string.setup_status_missing
+            },
+        )
         binding.primaryButton.isVisible = done || topic != SetupTopic.TILE || TileRequester.isSupported
-        binding.primaryButton.setText(if (done) R.string.setup_done else topic.action)
+        binding.primaryButton.setText(
+            when {
+                done -> R.string.setup_done
+                stopped -> R.string.setup_accessibility_open
+                else -> topic.action
+            },
+        )
         binding.dismissButton.isVisible = !done
     }
 
@@ -82,7 +96,8 @@ class SetupActivity : AppCompatActivity() {
     private fun isDone(): Boolean = when (topic) {
         SetupTopic.WRITE_SETTINGS -> Permissions.canWriteSettings(this)
         SetupTopic.OVERLAY -> Permissions.canDrawOverlays(this)
-        SetupTopic.ACCESSIBILITY -> Permissions.isAccessibilityServiceEnabled(this)
+        // switched on is not enough: after a crash Android keeps it switched on but stops it
+        SetupTopic.ACCESSIBILITY -> AccessibilityDetectionService.isConnected
         SetupTopic.USAGE_ACCESS -> Permissions.hasUsageAccess(this)
         SetupTopic.TILE -> Prefs.tileAdded
     }

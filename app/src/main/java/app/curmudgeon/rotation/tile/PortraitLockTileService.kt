@@ -58,7 +58,7 @@ class PortraitLockTileService : TileService() {
         tile.icon = Icon.createWithResource(this, R.drawable.ic_rotation_portrait)
         tile.label = getString(R.string.tile_force_portrait_label)
         tile.state = if (OrientationController.isPortraitForced) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
-        tile.updateTile()
+        tile.updateSafely()
     }
 
     @SuppressLint("StartActivityAndCollapseDeprecated")

@@ -9,6 +9,7 @@ import android.os.Build
 import androidx.annotation.ChecksSdkIntAtLeast
 import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import app.curmudgeon.rotation.R
 import app.curmudgeon.rotation.settings.Prefs
 
@@ -36,5 +37,14 @@ object TileRequester {
             onDone(result == StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ADDED ||
                 result == StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ALREADY_ADDED)
         }
+    }
+
+    /** Android has no way for an app to take a tile out of Quick Settings: says how to do it by hand. */
+    fun explainRemoving(context: Context) {
+        AlertDialog.Builder(context)
+            .setTitle(R.string.remove_tile_title)
+            .setMessage(R.string.remove_tile_body)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
     }
 }
