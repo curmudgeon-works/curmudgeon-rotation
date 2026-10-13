@@ -7,9 +7,9 @@ import org.junit.Test
 
 class RuleJsonTest {
     @Test
-    fun roundTripKeepsEveryActionAndScreenList() {
+    fun roundTripKeepsEveryActionScreenListAndOnOff() {
         val rules = RuleAction.entries.mapIndexed { i, action ->
-            AppRule("com.example.app$i", action, if (i % 2 == 0) emptySet() else setOf("com.example.app$i.A", "com.example.app$i.B"))
+            AppRule("com.example.app$i", action, if (i % 2 == 0) emptySet() else setOf("com.example.app$i.A", "com.example.app$i.B"), enabled = i % 3 != 0)
         }
         assertEquals(rules.toSet(), RuleJson.fromJson(RuleJson.toJson(rules)).toSet())
     }

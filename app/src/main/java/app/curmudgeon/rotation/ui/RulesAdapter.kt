@@ -11,7 +11,10 @@ import app.curmudgeon.rotation.R
 import app.curmudgeon.rotation.databinding.ItemRuleBinding
 import app.curmudgeon.rotation.rules.AppRule
 
-class RulesAdapter(private val onClick: (AppRule) -> Unit) : ListAdapter<AppRule, RulesAdapter.Holder>(Diff) {
+class RulesAdapter(
+    private val onClick: (AppRule) -> Unit,
+    private val onToggle: (AppRule, Boolean) -> Unit,
+) : ListAdapter<AppRule, RulesAdapter.Holder>(Diff) {
     class Holder(val binding: ItemRuleBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
@@ -35,6 +38,9 @@ class RulesAdapter(private val onClick: (AppRule) -> Unit) : ListAdapter<AppRule
         )
         holder.binding.ruleSummary.text = parts.joinToString(" · ")
         holder.itemView.setOnClickListener { onClick(rule) }
+        holder.binding.ruleEnabled.isChecked = rule.enabled
+        holder.binding.ruleEnabled.contentDescription = app.label
+        holder.binding.ruleEnabled.setOnClickListener { onToggle(rule, holder.binding.ruleEnabled.isChecked) }
     }
 
     private object Diff : DiffUtil.ItemCallback<AppRule>() {

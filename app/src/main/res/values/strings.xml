@@ -82,6 +82,7 @@
     <string name="rotate_direction_right">right</string>
     <string name="rotate_direction_bottom">bottom</string>
     <string name="rotate_direction_left">left</string>
+    <string name="rotate_rules">Per-app rules</string>
     <string name="rotate_rules_win">Per-app rules override above choice</string>
     <!-- the line above the choices: what holds rotation right now -->
     <string name="rotate_now">Now: %1$s</string>
@@ -96,16 +97,11 @@
     <string name="status_tiles">Quick Settings tiles</string>
     <string name="status_settings_summary">App detection, rotation, rules and more</string>
     <string name="status_write_settings">Modify system settings</string>
-    <string name="status_write_settings_ok">Allowed. The tile and rotation rules can change rotation.</string>
-    <string name="status_write_settings_missing">Needed by the tile and by all non-overlay rules</string>
+    <string name="status_write_settings_summary">Required for app to function</string>
+    <string name="status_accessibility_summary">Required for hard-locks and per-app rules</string>
+    <string name="status_usage_summary">Required for per-app rules</string>
     <string name="status_detection_accessibility">App detection: accessibility service</string>
-    <string name="status_accessibility_ok">Active. Per-app rules run.</string>
-    <string name="status_accessibility_starting">Switched on, waiting for the system to start it. If it stays like this, switch it off and on again.</string>
-    <string name="status_accessibility_missing">Off. Per-app rules don\'t run.</string>
     <string name="status_detection_usage">App detection: usage access</string>
-    <string name="status_usage_ok">Active. Per-app rules run while the screen is on.</string>
-    <string name="status_usage_not_running">Allowed, but the detection service isn\'t running</string>
-    <string name="status_usage_missing">Usage access not allowed. Per-app rules don\'t run.</string>
 
     <!-- setup / permission explanations -->
     <string name="setup_open_settings">Open settings</string>

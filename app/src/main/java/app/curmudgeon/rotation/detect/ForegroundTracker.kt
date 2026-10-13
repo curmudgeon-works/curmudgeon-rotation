@@ -41,11 +41,11 @@ object ForegroundTracker {
     }
 
     /**
-     * A per-app rule exists (and rules win), a flip is waiting and must hear when its app is left, or a tile or the
+     * A switched-on per-app rule exists (and rules win), a flip is waiting and must hear when its app is left, or a tile or the
      * Rotate choice must be lifted while the launcher is in front.
      */
     fun isWanted(): Boolean =
-        (Prefs.rulesWin && RuleStore.all().isNotEmpty()) || OrientationController.isFlipping || OrientationController.watchesLauncher
+        (Prefs.rulesWin && RuleStore.hasEnabled()) || OrientationController.isFlipping || OrientationController.watchesLauncher
 
     /**
      * Rules or a flip changed: subscribes the accessibility service to app changes only while [isWanted], and forgets
@@ -109,7 +109,7 @@ object ForegroundTracker {
     private fun evaluate(event: WindowEvent) {
         val launcher = event.packageName in launchers
         OrientationController.onForegroundChanged(event.packageName, launcher)
-        if (launcher && Prefs.ignoreLauncher && RuleStore.find(event.packageName) == null) return
+        if (launcher && Prefs.ignoreLauncher && RuleStore.find(event.packageName)?.enabled != true) return
         OrientationController.applyRule(
             if (Prefs.rulesWin) RuleMatcher.match(RuleStore.all(), event.packageName, event.activity) else null,
         )

@@ -58,9 +58,9 @@
                     android:alpha="0.2"
                     android:background="@color/text_secondary" />
 
-                <!-- "Per-app rules": the checkbox says whether rules override the choice above; the rest of the row folds the list -->
+                <!-- whether per-app rules override the choice above -->
                 <LinearLayout
-                    android:id="@+id/rulesRow"
+                    android:id="@+id/rulesWinRow"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="?android:attr/selectableItemBackground"
@@ -81,6 +81,32 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/rotate_rules_win"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Subhead" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="4dp"
+                    android:alpha="0.2"
+                    android:background="@color/text_secondary" />
+
+                <!-- "Per-app rules": tapping folds the list -->
+                <LinearLayout
+                    android:id="@+id/rulesRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:minHeight="56dp"
+                    android:orientation="horizontal"
+                    android:paddingVertical="6dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/rotate_rules"
                         android:textAppearance="@style/TextAppearance.AppCompat.Subhead" />
 
                     <ImageView

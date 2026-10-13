@@ -37,4 +37,11 @@
             android:textColor="@color/text_secondary"
             tools:text="Auto-rotate on · all screens" />
     </LinearLayout>
+
+    <!-- switches the rule on or off without deleting it; the rest of the row opens the rule -->
+    <CheckBox
+        android:id="@+id/ruleEnabled"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp" />
 </LinearLayout>

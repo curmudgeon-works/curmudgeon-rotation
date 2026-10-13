@@ -35,6 +35,13 @@ class RuleMatcherTest {
     }
 
     @Test
+    fun switchedOffRuleMeansNoRule() {
+        val off = listOf(youtube.copy(enabled = false), hbo.copy(enabled = false))
+        assertNull(RuleMatcher.match(off, youtube.packageName, "AnyOtherActivity"))
+        assertNull(RuleMatcher.match(off, hbo.packageName, "com.wbd.stream.PlayerActivity"))
+    }
+
+    @Test
     fun relativeActivityNamesResolveAgainstPackage() {
         assertEquals("com.wbd.stream.PlayerActivity", normalizeActivityName("com.wbd.stream", " .PlayerActivity "))
         assertEquals("org.other.Activity", normalizeActivityName("com.wbd.stream", "org.other.Activity"))

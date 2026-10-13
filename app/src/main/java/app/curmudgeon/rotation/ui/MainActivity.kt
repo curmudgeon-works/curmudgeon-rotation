@@ -26,7 +26,10 @@ import app.curmudgeon.rotation.settings.SettingsActivity
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private val rulesAdapter = RulesAdapter { rule -> startActivity(RuleEditorActivity.intent(this, rule.packageName)) }
+    private val rulesAdapter = RulesAdapter(
+        onClick = { rule -> startActivity(RuleEditorActivity.intent(this, rule.packageName)) },
+        onToggle = { rule, enabled -> RuleStore.put(rule.copy(enabled = enabled)) },
+    )
     private val onChange: () -> Unit = { runOnUiThread(::render) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,11 +41,8 @@ class MainActivity : AppCompatActivity() {
         binding.rulesList.layoutManager = LinearLayoutManager(this)
         binding.rulesList.adapter = rulesAdapter
         binding.addRuleRow.setOnClickListener { startActivity(Intent(this, AppPickerActivity::class.java)) }
-        binding.rulesWin.setOnClickListener {
-            Prefs.rulesWin = binding.rulesWin.isChecked
-            ForegroundTracker.onRulesWinChanged()
-            render()
-        }
+        binding.rulesWin.setOnClickListener { setRulesWin(binding.rulesWin.isChecked) }
+        binding.rulesWinRow.setOnClickListener { setRulesWin(!Prefs.rulesWin) }
         binding.rulesRow.setOnClickListener {
             Prefs.rulesUnfolded = !Prefs.rulesUnfolded
             render()
@@ -68,6 +68,12 @@ class MainActivity : AppCompatActivity() {
         RuleStore.removeListener(onChange)
         OrientationController.removeListener(onChange)
         super.onPause()
+    }
+
+    private fun setRulesWin(win: Boolean) {
+        Prefs.rulesWin = win
+        ForegroundTracker.onRulesWinChanged()
+        render()
     }
 
     private fun render() {
@@ -150,34 +156,25 @@ class MainActivity : AppCompatActivity() {
     private fun renderStatus() {
         binding.statusRows.removeAllViews()
 
-        val canWrite = Permissions.canWriteSettings(this)
         statusRow(
             getString(R.string.status_write_settings),
-            getString(if (canWrite) R.string.status_write_settings_ok else R.string.status_write_settings_missing),
-            fix = if (canWrite) null else ({ openSetup(SetupTopic.WRITE_SETTINGS) }),
-        )
+            getString(R.string.status_write_settings_summary),
+            checked = Permissions.canWriteSettings(this),
+        ) { openSetup(SetupTopic.WRITE_SETTINGS) }
 
         when (Prefs.detectionMethod) {
-            DetectionMethod.ACCESSIBILITY -> {
-                val connected = AccessibilityDetectionService.isConnected
-                val detail = when {
-                    connected -> R.string.status_accessibility_ok
-                    Permissions.isAccessibilityServiceEnabled(this) -> R.string.status_accessibility_starting
-                    else -> R.string.status_accessibility_missing
-                }
-                statusRow(getString(R.string.status_detection_accessibility), getString(detail), checked = connected) {
-                    openSetup(SetupTopic.ACCESSIBILITY)
-                }
-            }
+            DetectionMethod.ACCESSIBILITY -> statusRow(
+                getString(R.string.status_detection_accessibility),
+                getString(R.string.status_accessibility_summary),
+                checked = AccessibilityDetectionService.isConnected,
+            ) { openSetup(SetupTopic.ACCESSIBILITY) }
             DetectionMethod.USAGE_STATS -> {
                 val access = Permissions.hasUsageAccess(this)
-                val running = access && RotationService.isRunning
-                val detail = when {
-                    running -> R.string.status_usage_ok
-                    access -> R.string.status_usage_not_running
-                    else -> R.string.status_usage_missing
-                }
-                statusRow(getString(R.string.status_detection_usage), getString(detail), checked = running) {
+                statusRow(
+                    getString(R.string.status_detection_usage),
+                    getString(R.string.status_usage_summary),
+                    checked = access && RotationService.isRunning,
+                ) {
                     if (access) RotationService.sync(this) else openSetup(SetupTopic.USAGE_ACCESS)
                     render()
                 }
@@ -192,19 +189,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** One row: a [fix] button when given, a state-only checkbox on the right when [checked] is given, tappable when [open] is given. */
+    /** One row: a state-only checkbox on the right when [checked] is given, tappable when [open] is given. */
     private fun statusRow(
         title: String,
         detail: String,
         checked: Boolean? = null,
-        fix: (() -> Unit)? = null,
         open: (() -> Unit)? = null,
     ) {
         val row = ItemStatusRowBinding.inflate(layoutInflater, binding.statusRows, true)
         row.statusTitle.text = title
         row.statusDetail.text = detail
-        row.statusFix.isVisible = fix != null
-        row.statusFix.setOnClickListener { fix?.invoke() }
         row.statusCheck.isVisible = checked != null
         row.statusCheck.isChecked = checked == true
         if (open != null) {

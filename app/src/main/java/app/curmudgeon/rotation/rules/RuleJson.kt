@@ -18,6 +18,7 @@ object RuleJson {
                     .put("package", rule.packageName)
                     .put("action", rule.action.id)
                     .put("activities", JSONArray(rule.activities.sorted()))
+                    .put("enabled", rule.enabled)
             )
         }
         return JSONObject()
@@ -46,7 +47,7 @@ object RuleJson {
             val activities = entry.optJSONArray("activities")?.let { list ->
                 (0 until list.length()).map { list.optString(it).trim() }.filter { it.isNotEmpty() }.toSet()
             } ?: emptySet()
-            byPackage[packageName] = AppRule(packageName, action, activities)
+            byPackage[packageName] = AppRule(packageName, action, activities, entry.optBoolean("enabled", true))
         }
         return byPackage.values.toList()
     }

@@ -3,12 +3,13 @@ package app.curmudgeon.rotation.rules
 
 /**
  * One rule per app. When [activities] is empty the rule covers every screen of [packageName];
- * otherwise only those fully qualified activity class names.
+ * otherwise only those fully qualified activity class names. A rule that is not [enabled] is kept but does nothing.
  */
 data class AppRule(
     val packageName: String,
     val action: RuleAction,
     val activities: Set<String> = emptySet(),
+    val enabled: Boolean = true,
 ) {
     fun appliesTo(activity: String): Boolean = activities.isEmpty() || activity in activities
 }

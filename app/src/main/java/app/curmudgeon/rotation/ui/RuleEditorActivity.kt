@@ -203,7 +203,7 @@ class RuleEditorActivity : AppCompatActivity() {
             Toast.makeText(this, R.string.editor_no_screens, Toast.LENGTH_LONG).show()
             return
         }
-        RuleStore.put(AppRule(targetPackage, action, if (limited) screens.toSet() else emptySet()))
+        RuleStore.put(AppRule(targetPackage, action, if (limited) screens.toSet() else emptySet(), existing?.enabled ?: true))
         // a rule only runs if the app can tell which app is in front: ask for that now if it is missing
         if (action != RuleAction.FOLLOW_SYSTEM) {
             val detectionReady = when (Prefs.detectionMethod) {

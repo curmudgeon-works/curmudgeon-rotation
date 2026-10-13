@@ -30,6 +30,8 @@ object RuleStore {
 
     fun all(): List<AppRule> = cache
 
+    fun hasEnabled(): Boolean = cache.any { it.enabled }
+
     fun find(packageName: String): AppRule? = cache.firstOrNull { it.packageName == packageName }
 
     fun put(rule: AppRule) = save(cache.filterNot { it.packageName == rule.packageName } + rule)

@@ -28,15 +28,8 @@
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.AppCompat.Caption"
             android:textColor="@color/text_secondary"
-            tools:text="Needed for the tile and most rules" />
+            tools:text="Required for app to function" />
     </LinearLayout>
-
-    <Button
-        android:id="@+id/statusFix"
-        style="@style/Widget.Curmudgeon.Button.Text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/status_fix" />
 
     <!-- shows the state only; the row opens the screen where Android lets you change it -->
     <CheckBox
