@@ -9,6 +9,17 @@
     android:orientation="horizontal"
     android:paddingVertical="6dp">
 
+    <!-- green tick when allowed and running, exclamation when not; hidden on plain link rows -->
+    <ImageView
+        android:id="@+id/statusIndicator"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="12dp"
+        android:importantForAccessibility="no"
+        android:visibility="gone"
+        tools:src="@drawable/ic_status_ok"
+        tools:visibility="visible" />
+
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -31,14 +42,11 @@
             tools:text="Required for app to function" />
     </LinearLayout>
 
-    <!-- shows the state only; the row opens the screen where Android lets you change it -->
-    <CheckBox
-        android:id="@+id/statusCheck"
+    <Button
+        android:id="@+id/statusFix"
+        style="@style/Widget.Curmudgeon.Button.Text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:clickable="false"
-        android:focusable="false"
-        android:importantForAccessibility="no"
+        android:text="@string/status_fix"
         android:visibility="gone" />
 </LinearLayout>

@@ -159,21 +159,21 @@ class MainActivity : AppCompatActivity() {
         statusRow(
             getString(R.string.status_write_settings),
             getString(R.string.status_write_settings_summary),
-            checked = Permissions.canWriteSettings(this),
+            ok = Permissions.canWriteSettings(this),
         ) { openSetup(SetupTopic.WRITE_SETTINGS) }
 
         when (Prefs.detectionMethod) {
             DetectionMethod.ACCESSIBILITY -> statusRow(
                 getString(R.string.status_detection_accessibility),
                 getString(R.string.status_accessibility_summary),
-                checked = AccessibilityDetectionService.isConnected,
+                ok = AccessibilityDetectionService.isConnected,
             ) { openSetup(SetupTopic.ACCESSIBILITY) }
             DetectionMethod.USAGE_STATS -> {
                 val access = Permissions.hasUsageAccess(this)
                 statusRow(
                     getString(R.string.status_detection_usage),
                     getString(R.string.status_usage_summary),
-                    checked = access && RotationService.isRunning,
+                    ok = access && RotationService.isRunning,
                 ) {
                     if (access) RotationService.sync(this) else openSetup(SetupTopic.USAGE_ACCESS)
                     render()
@@ -189,18 +189,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** One row: a state-only checkbox on the right when [checked] is given, tappable when [open] is given. */
+    /**
+     * One row, tappable when [open] is given. With [ok]: a tick or exclamation on the left, and a Fix button on the
+     * right while it isn't ok (Fix does what tapping the row does).
+     */
     private fun statusRow(
         title: String,
         detail: String,
-        checked: Boolean? = null,
+        ok: Boolean? = null,
         open: (() -> Unit)? = null,
     ) {
         val row = ItemStatusRowBinding.inflate(layoutInflater, binding.statusRows, true)
         row.statusTitle.text = title
         row.statusDetail.text = detail
-        row.statusCheck.isVisible = checked != null
-        row.statusCheck.isChecked = checked == true
+        row.statusIndicator.isVisible = ok != null
+        row.statusIndicator.setImageResource(if (ok == true) R.drawable.ic_status_ok else R.drawable.ic_status_missing)
+        row.statusFix.isVisible = ok == false && open != null
+        row.statusFix.setOnClickListener { open?.invoke() }
         if (open != null) {
             row.root.setBackgroundResource(TypedValue().also { theme.resolveAttribute(android.R.attr.selectableItemBackground, it, true) }.resourceId)
             row.root.setOnClickListener { open() }

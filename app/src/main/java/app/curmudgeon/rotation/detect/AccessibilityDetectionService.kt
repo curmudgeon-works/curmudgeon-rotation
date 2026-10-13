@@ -51,7 +51,8 @@ class AccessibilityDetectionService : AccessibilityService() {
     }
 
     private fun disconnect() {
-        if (!isConnected) return
+        // a rebind can connect the new instance before the old one is destroyed; only the live one may clear the flag
+        if (instance !== this) return
         isConnected = false
         instance = null
         if (Prefs.detectionMethod == DetectionMethod.ACCESSIBILITY) ForegroundTracker.stop()
