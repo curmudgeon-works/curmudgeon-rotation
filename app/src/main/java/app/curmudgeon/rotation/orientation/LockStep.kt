@@ -5,7 +5,7 @@ import android.content.pm.ActivityInfo
 import android.view.Surface
 
 /**
- * Orientations the "Lock" tile goes through in cycle mode, in tap order, each a hard lock. The first is landscape so
+ * Orientations the "Lock landscape" tile goes through in cycle mode, in tap order, each a hard lock. The first is landscape so
  * the first tap does what the plain landscape Lock does; the tap after the last releases the lock.
  */
 enum class LockStep(val userRotation: Int, val overlayOrientation: Int) {

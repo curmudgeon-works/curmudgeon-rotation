@@ -18,7 +18,7 @@ import app.curmudgeon.rotation.service.RotationService
 import app.curmudgeon.rotation.settings.LockTapAction
 
 /**
- * Second tile ("Lock"), for apps that insist on portrait (HBO Max): tap forces landscape with the hard lock, tap again puts
+ * Second tile ("Lock landscape"), for apps that insist on portrait (HBO Max): tap forces landscape with the hard lock, tap again puts
  * the previous rotation back ([OrientationController.toggleForcedLandscape]). Long-press opens the app.
  * Without the permissions it needs, a tap opens the matching explanation screen instead.
  */
