@@ -4,8 +4,10 @@ package app.curmudgeon.rotation.settings
 import app.curmudgeon.rotation.detect.EventLog
 
 import android.Manifest
+import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -128,6 +130,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         onClick(PrefKeys.EVENT_LOG) { showEventLog() }
         find<Preference>(PrefKeys.ABOUT)?.summary = getString(R.string.pref_about_summary, BuildConfig.VERSION_NAME)
         onClick(PrefKeys.ABOUT) { showAbout() }
+        onClick(PrefKeys.RATE_SHARE) { showRateShare() }
 
         applyMode()
     }
@@ -331,6 +334,34 @@ class SettingsFragment : PreferenceFragmentCompat() {
             .setMessage(getString(R.string.about_text, BuildConfig.VERSION_NAME))
             .setPositiveButton(android.R.string.ok, null)
             .show()
+    }
+
+    /** Rate opens the Play Store app on our listing (the web page if there is no Play Store); Share sends a link. No prompts anywhere else. */
+    private fun showRateShare() {
+        val context = requireContext()
+        AlertDialog.Builder(context)
+            .setTitle(R.string.pref_rate_share)
+            .setItems(arrayOf(getString(R.string.rate_on_play), getString(R.string.share_app))) { _, which ->
+                if (which == 0) openPlayListing() else shareApp()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun openPlayListing() {
+        val id = BuildConfig.APPLICATION_ID.removeSuffix(".debug")
+        val market = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$id"))
+        val web = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$id"))
+        try {
+            startActivity(market)
+        } catch (_: ActivityNotFoundException) {
+            try { startActivity(web) } catch (_: ActivityNotFoundException) { }
+        }
+    }
+
+    private fun shareApp() {
+        val send = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, getString(R.string.share_app_text))
+        startActivity(Intent.createChooser(send, getString(R.string.share_app)))
     }
 
     private fun toast(message: String) = Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()

@@ -31,4 +31,10 @@
         app:icon="@drawable/ic_info"
         app:key="about"
         app:title="@string/pref_about" />
+
+    <Preference
+        app:icon="@drawable/ic_tile_star"
+        app:key="rate_share"
+        app:summary="@string/pref_rate_share_summary"
+        app:title="@string/pref_rate_share" />
 </PreferenceScreen>

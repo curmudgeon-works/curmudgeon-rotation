@@ -42,6 +42,7 @@ object PrefKeys {
     const val KEEP_EVENT_LOG = "keep_event_log"
     const val EVENT_LOG = "event_log"
     const val ABOUT = "about"
+    const val RATE_SHARE = "rate_share"
 }
 
 enum class DetectionMethod(val value: String) { ACCESSIBILITY("accessibility"), USAGE_STATS("usage_stats") }

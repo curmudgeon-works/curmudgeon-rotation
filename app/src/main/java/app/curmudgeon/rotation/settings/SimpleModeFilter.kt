@@ -18,6 +18,7 @@ object SimpleModeFilter {
         PrefKeys.EXPORT_RULES,
         PrefKeys.IMPORT_RULES,
         PrefKeys.ABOUT,
+        PrefKeys.RATE_SHARE,
     )
 
     /** Whether a single setting shows: every setting in advanced mode, only [SIMPLE_KEYS] (and custom tiles) otherwise. */
