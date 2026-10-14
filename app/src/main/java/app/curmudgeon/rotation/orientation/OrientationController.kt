@@ -43,7 +43,7 @@ object OrientationController {
     private var forcedWritten: SystemRotation? = null
     /** Where a cycling Lock is, or null for the plain landscape Lock (either landscape side). */
     private var forcedStep: LockStep? = null
-    /** The Lock is the "Lock portrait" tile's hard portrait lock rather than a landscape one. */
+    /** The Lock is the "Portrait" tile's hard portrait lock rather than a landscape one. */
     private var forcedPortrait = false
     private var forcedWatcher: TurnWatcher? = null
     /** Follows the portrait side while "Portrait lock, flippable" is in force and the screen is on. */
