@@ -43,6 +43,13 @@ enum class HomeChoice(val value: String) {
     companion object {
         fun of(value: String?): HomeChoice? = entries.firstOrNull { it.value == value }
 
+        /**
+         * What "System default" writes back: [before], Android's setting from before the first Rotate choice, while
+         * [settings] still hold what [home] wrote. Null when nothing was picked, or rotation was changed elsewhere since.
+         */
+        fun systemDefaultRestore(home: HomeChoice?, before: SystemRotation?, settings: SystemRotation, arrow: Int): SystemRotation? =
+            before?.takeIf { home != null && home.system(settings, arrow).isStillIn(settings) }
+
         /** The arrow's next direction, a quarter turn clockwise: top → right → bottom → left. */
         fun nextArrow(arrow: Int): Int = (arrow + 1) % 4
 

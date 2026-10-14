@@ -114,6 +114,7 @@ object OrientationController {
         if (home != null && flip == null && forcedFrom == null && !session.isActive && !homeHolds(home)) {
             EventLog.log("rotation changed elsewhere (now ${systemSettings.read()}) → Rotate choice $home dropped")
             Prefs.homeChoice = null
+            Prefs.homeBefore = null
             applyOverlay()
             notifyChanged()
         }
@@ -135,15 +136,21 @@ object OrientationController {
     fun isSystemDefault(): Boolean = flip == null && forcedFrom == null && selectedHome() == null
 
     /**
-     * Picks "System default" under "Rotate": a running flip or Lock ends and our choice is dropped, without writing
-     * anything, so Android's own rotation setting (its Auto-rotate tile) is what applies from here. [restore]: the
-     * system settings to put back first (a custom tile going back to the system default it started from).
+     * Picks "System default" under "Rotate": a running flip or Lock ends, our choice is dropped and Android's own
+     * setting from before it comes back (unless rotation was changed elsewhere since), so Android's rotation setting
+     * (its Auto-rotate tile) is what applies from here. [restore]: the system settings to put back instead (a custom
+     * tile going back to the system default it started from).
      */
     fun setSystemDefault(restore: SystemRotation? = null) {
+        val settings = temporaryStart()?.rotation ?: systemSettings.read()
+        val back = restore ?: HomeChoice.systemDefaultRestore(Prefs.homeChoice, Prefs.homeBefore, settings, Prefs.lockArrow)
         endFlip()
-        if (restore != null && systemSettings.canWrite()) session.applyManual(restore)
-        EventLog.log("rotate: system default (${if (restore != null) "restored $restore" else "nothing written"}, now ${systemSettings.read()})")
+        if (back != null && systemSettings.canWrite()) session.applyManual(back)
+        EventLog.log("rotate: system default (${if (back != null) "restored $back" else "nothing written"}, now ${systemSettings.read()})")
         Prefs.homeChoice = null
+        Prefs.homeBefore = null
+        // a manual mode left from a choice (Landscape lock writes LANDSCAPE) would put the hard lock straight back
+        Prefs.manualMode = OrientationMode.OFF
         applyOverlay()
         notifyChanged()
     }
@@ -155,6 +162,9 @@ object OrientationController {
      */
     fun setHome(choice: HomeChoice): Boolean {
         if (!systemSettings.canWrite() || (choice.needsHardLock && !canForce())) return false
+        if (Prefs.homeBefore == null) {
+            Prefs.homeBefore = temporaryStart()?.rotation ?: Prefs.rotationStateStore.snapshot ?: systemSettings.read()
+        }
         endFlip()
         val target = choice.system(systemSettings.read(), Prefs.lockArrow)
         EventLog.log("rotate: $choice (writing $target)")
@@ -200,6 +210,7 @@ object OrientationController {
         session.applyManual(mode.toSystemRotation(systemSettings.read()))
         Prefs.manualMode = mode
         Prefs.homeChoice = null
+        Prefs.homeBefore = null
         applyOverlay()
         notifyChanged()
         return true

@@ -143,6 +143,11 @@ object Prefs {
         get() = HomeChoice.of(state.getString("home_choice", null))
         set(value) = state.edit { putString("home_choice", value?.value) }
 
+    /** Android's rotation setting from before the first Rotate choice; "System default" puts it back. */
+    var homeBefore: SystemRotation?
+        get() = readRotation("home_before")
+        set(value) = writeRotation("home_before", value)
+
     /** Where the "Lock orientation" arrow points: a Surface rotation, the top of the picture on the phone. */
     var lockArrow: Int
         get() = state.getInt("lock_arrow", 0).coerceIn(0, 3)

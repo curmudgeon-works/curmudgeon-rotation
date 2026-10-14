@@ -55,4 +55,23 @@ class HomeChoiceTest {
         assertNull(HomeChoice.of(null))
         assertNull(HomeChoice.of("nonsense"))
     }
+
+    @Test
+    fun systemDefaultPutsBackTheSettingFromBeforeTheChoice() {
+        val before = SystemRotation(autoRotate = true, userRotation = Surface.ROTATION_0)
+        val landscape = HomeChoice.LANDSCAPE_FLIP.system(before, 0)
+        assertEquals(before, HomeChoice.systemDefaultRestore(HomeChoice.LANDSCAPE_FLIP, before, landscape, 0))
+        val locked = HomeChoice.LOCKED.system(before, Surface.ROTATION_0)
+        assertEquals(before, HomeChoice.systemDefaultRestore(HomeChoice.LOCKED, before, locked, Surface.ROTATION_0))
+    }
+
+    @Test
+    fun systemDefaultLeavesAChangeMadeElsewhere() {
+        val before = SystemRotation(autoRotate = true, userRotation = Surface.ROTATION_0)
+        // Landscape lock wrote auto-rotate off at 90; the user then turned auto-rotate on from Android's own tile
+        val changed = SystemRotation(autoRotate = true, userRotation = Surface.ROTATION_90)
+        assertNull(HomeChoice.systemDefaultRestore(HomeChoice.LANDSCAPE_FLIP, before, changed, 0))
+        assertNull(HomeChoice.systemDefaultRestore(null, before, changed, 0))
+        assertNull(HomeChoice.systemDefaultRestore(HomeChoice.LOCKED, null, HomeChoice.LOCKED.system(before, 0), 0))
+    }
 }
